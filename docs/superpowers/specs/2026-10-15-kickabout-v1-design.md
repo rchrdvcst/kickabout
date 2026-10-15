@@ -82,7 +82,7 @@ kickabout/
 |---|---|---|
 | **User** | id, email, passwordHash, role | v1: só o admin. Dono de times/campeonatos. |
 | **Team** | id, name, shortName, crestUrl, ownerId | |
-| **Player** | id, name, phone (único, formato E.164 `+55…`) | Celular é dado pessoal: só visível no admin. |
+| **Player** | id, name, phone (único, formato E.164 `+55…`), phoneConsentAt | Nome + celular identificam o jogador (usados no BID do time). Visibilidade do celular: ver seção 5.3. |
 | **TeamMembership** | id, teamId, playerId, joinedAt, leftAt? | Ativo quando `leftAt` é nulo. Limite de 20 ativos por time; 1 vínculo ativo por jogador. |
 | **Tournament** | id, name, format, status (`draft` → `in_progress` → `finished`), options (JSON: 3º lugar, reset na final, turnos), ownerId, bmStageId | |
 | **TournamentEntry** | tournamentId, teamId, seed | Times inscritos. |
@@ -100,18 +100,26 @@ Mobile-first em todas as telas.
 ### 5.1 Públicas (sem login)
 - **Início** — campeonatos em andamento, últimos resultados, atalho para títulos.
 - **Campeonatos** — lista com filtro por status.
-- **Campeonato** — abas: *Chave/Tabela* (brackets-viewer no mata-mata; classificação no round robin), *Jogos* (confrontos por rodada), *Estatísticas* (artilharia, mais vitórias em duelos, melhor aproveitamento).
+- **Campeonato** — abas: *Chave/Tabela* (brackets-viewer no mata-mata; classificação no round robin), *Times*, *Jogos* (confrontos por rodada), *Estatísticas* (artilharia, mais vitórias em duelos, melhor aproveitamento).
+- **Times do campeonato** (aba *Times*) — lista dos times inscritos (escudo + nome). Clicar no nome do time abre o **BID do time**.
+- **BID do time** — lista de todos os jogadores ativos do time com **nome e número de celular**. O número é um link para o WhatsApp do jogador (`https://wa.me/<dígitos>`, ex.: `https://wa.me/5511987654321`). Uso principal: os confrontos são organizados em grupos de WhatsApp, e o BID permite conferir se o jogador escalado é quem está no grupo da partida.
 - **Confronto** — placar de duelos e lista dos 5–6 duelos (jogadores, placar, pênaltis).
-- **Time** — escudo, elenco atual, estatísticas (confrontos V/E/D, duelos V/E/D, gols), títulos, últimos confrontos, campeonatos disputados.
-- **Jogador** — nome, time atual, histórico de times, estatísticas (duelos, V/E/D, gols marcados/sofridos, saldo, aproveitamento), histórico de duelos, títulos conquistados com o time. **Sem celular.**
+- **Time** — escudo, elenco atual (BID: nome + celular com link para WhatsApp), estatísticas (confrontos V/E/D, duelos V/E/D, gols), títulos, últimos confrontos, campeonatos disputados.
+- **Jogador** — nome, time atual, histórico de times, estatísticas (duelos, V/E/D, gols marcados/sofridos, saldo, aproveitamento), histórico de duelos, títulos conquistados com o time.
 - **Títulos** — ranking de times por títulos (campeão/vice/3º) e lista de campeões por campeonato.
 
 ### 5.2 Admin (login)
 - **Times** — CRUD; gerenciar elenco com aviso ao atingir 20.
-- **Jogadores** — cadastro (nome + celular), busca, transferência entre times.
+- **Jogadores** — cadastro (nome + celular + confirmação de consentimento para exibir o número), busca, transferência entre times.
 - **Campeonatos** — criar (formato + opções) → inscrever times e definir seeds → gerar chave/tabela → acompanhar → finalizar (gera títulos).
 - **Lançar resultado** — ver seção 6.
 - **Títulos históricos** — cadastro manual.
+
+### 5.3 Visibilidade do celular
+- O celular aparece **apenas nas listas de BID** (elenco na página do time e tela *BID do time*) e no admin. Não aparece em páginas de jogador, confronto, estatísticas ou títulos.
+- **v1:** BID público (sem login).
+- **Futuro:** BID visível só para usuários logados. Para isso não exigir mudança de código, a visibilidade é controlada por configuração da API: `PHONE_VISIBILITY=public | authenticated` (v1: `public`). Com `authenticated`, as respostas da API omitem o campo `phone` para visitantes sem sessão, e o front mostra só o nome.
+- Como o celular é dado pessoal (LGPD) e fica público na v1, o cadastro do jogador deve ter o **consentimento** dele para exibição do número (responsabilidade do admin ao cadastrar; registrado como `phoneConsentAt` no Player).
 
 ## 6. Fluxo de lançamento de resultado
 
@@ -148,12 +156,12 @@ Remover jogador do elenco nunca apaga dados: encerra o vínculo (`leftAt`).
 
 - Um usuário admin criado por script de seed (email e senha via variáveis de ambiente).
 - Senha com hash **argon2**; sessão em cookie **httpOnly**, `secure` em produção, `sameSite=lax`.
-- Rotas de escrita exigem sessão; rotas de leitura são públicas e nunca retornam o celular dos jogadores.
+- Rotas de escrita exigem sessão; rotas de leitura são públicas. O celular só é retornado pelos endpoints de BID, conforme `PHONE_VISIBILITY` (seção 5.3).
 
 ## 9. Testes
 
 - **`packages/shared`** — testes unitários (Vitest), escritos com **TDD**: pontuação de duelos, placar do confronto, regras do 6º duelo e pênaltis, classificação com todos os critérios — incluindo confronto direto com **3+ times empatados** — e agregação de estatísticas.
-- **`apps/api`** — testes de integração contra Postgres real (Docker): criar campeonato → gerar chave → lançar resultados → avanço na chave → finalizar → títulos, nos três formatos; validações da seção 7; bloqueio de edição no mata-mata; ausência do celular nas respostas públicas.
+- **`apps/api`** — testes de integração contra Postgres real (Docker): criar campeonato → gerar chave → lançar resultados → avanço na chave → finalizar → títulos, nos três formatos; validações da seção 7; bloqueio de edição no mata-mata; celular presente só nos endpoints de BID e omitido para visitantes quando `PHONE_VISIBILITY=authenticated`.
 - **`apps/web`** — testes de componentes (Vitest + Testing Library) do formulário de lançamento de resultado.
 - E2E (Playwright): fora da v1.
 
@@ -172,6 +180,7 @@ Remover jogador do elenco nunca apaga dados: encerra o vínculo (`leftAt`).
 | Mata-mata | Jogo único por confronto |
 | Eliminatória dupla | Final com reset opcional por campeonato |
 | Round robin | Turno único ou ida e volta, configurável |
-| Jogador | Nome + celular (único, privado) |
+| Jogador | Nome + celular (único); celular visível no BID com link para WhatsApp |
+| Visibilidade do celular | v1 pública; depois só logados, via `PHONE_VISIBILITY` |
 | Estatísticas | Calculadas a partir dos duelos, não armazenadas |
 | Títulos históricos | Cadastro manual permitido |
