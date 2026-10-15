@@ -1,7 +1,7 @@
 # Kickabout v1 — Design
 
 **Data:** 2026-10-15
-**Status:** aprovado em conversa, aguardando revisão do spec escrito
+**Status:** aprovado
 
 ## 1. Objetivo
 
@@ -82,7 +82,7 @@ kickabout/
 |---|---|---|
 | **User** | id, email, passwordHash, role | v1: só o admin. Dono de times/campeonatos. |
 | **Team** | id, name, shortName, crestUrl, ownerId | |
-| **Player** | id, name, phone (único, formato E.164 `+55…`), phoneConsentAt | Nome + celular identificam o jogador (usados no BID do time). Visibilidade do celular: ver seção 5.3. |
+| **Player** | id, name, phone (único, formato E.164 `+55…`) | Nome + celular identificam o jogador (usados no BID do time). Visibilidade do celular: ver seção 5.3. |
 | **TeamMembership** | id, teamId, playerId, joinedAt, leftAt? | Ativo quando `leftAt` é nulo. Limite de 20 ativos por time; 1 vínculo ativo por jogador. |
 | **Tournament** | id, name, format, status (`draft` → `in_progress` → `finished`), options (JSON: 3º lugar, reset na final, turnos), ownerId, bmStageId | |
 | **TournamentEntry** | tournamentId, teamId, seed | Times inscritos. |
@@ -110,7 +110,7 @@ Mobile-first em todas as telas.
 
 ### 5.2 Admin (login)
 - **Times** — CRUD; gerenciar elenco com aviso ao atingir 20.
-- **Jogadores** — cadastro (nome + celular + confirmação de consentimento para exibir o número), busca, transferência entre times.
+- **Jogadores** — cadastro (nome + celular), busca, transferência entre times.
 - **Campeonatos** — criar (formato + opções) → inscrever times e definir seeds → gerar chave/tabela → acompanhar → finalizar (gera títulos).
 - **Lançar resultado** — ver seção 6.
 - **Títulos históricos** — cadastro manual.
@@ -119,7 +119,7 @@ Mobile-first em todas as telas.
 - O celular aparece **apenas nas listas de BID** (elenco na página do time e tela *BID do time*) e no admin. Não aparece em páginas de jogador, confronto, estatísticas ou títulos.
 - **v1:** BID público (sem login).
 - **Futuro:** BID visível só para usuários logados. Para isso não exigir mudança de código, a visibilidade é controlada por configuração da API: `PHONE_VISIBILITY=public | authenticated` (v1: `public`). Com `authenticated`, as respostas da API omitem o campo `phone` para visitantes sem sessão, e o front mostra só o nome.
-- Como o celular é dado pessoal (LGPD) e fica público na v1, o cadastro do jogador deve ter o **consentimento** dele para exibição do número (responsabilidade do admin ao cadastrar; registrado como `phoneConsentAt` no Player).
+- O consentimento para exibir o número é dado fora do sistema, quando o time e o jogador decidem participar do campeonato. O Kickabout não registra consentimento.
 
 ## 6. Fluxo de lançamento de resultado
 
