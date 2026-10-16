@@ -168,4 +168,6 @@ model Title {
   position       Int
   year           Int
   createdAt      DateTime    @default(now())
+
+  @@unique([tournamentId, position])
 }

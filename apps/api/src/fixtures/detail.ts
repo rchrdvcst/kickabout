@@ -81,7 +81,15 @@ export async function getFixtureDetail(db: Db, tournamentId: string, matchId: nu
     })),
   };
   if (!includeRosters) return detail;
-  const pick = (players: { id: string; name: string }[]) => players.map(({ id, name }) => ({ id, name }));
-  const [rosterA, rosterB] = await Promise.all([activePlayers(db, view.teamAId), activePlayers(db, view.teamBId)]);
-  return { ...detail, rosterA: pick(rosterA), rosterB: pick(rosterB) };
+  // Inclui quem já jogou este confronto, mesmo que tenha saído do time depois (permite corrigir o resultado).
+  const roster = (active: { id: string; name: string }[], played: { id: string; name: string }[]) => {
+    const byId = new Map([...active, ...played].map(({ id, name }) => [id, { id, name }]));
+    return [...byId.values()];
+  };
+  const [activeA, activeB] = await Promise.all([activePlayers(db, view.teamAId), activePlayers(db, view.teamBId)]);
+  return {
+    ...detail,
+    rosterA: roster(activeA, detail.duels.map((duel) => duel.playerA)),
+    rosterB: roster(activeB, detail.duels.map((duel) => duel.playerB)),
+  };
 }

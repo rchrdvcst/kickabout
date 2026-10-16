@@ -2,7 +2,7 @@ import { computeFixtureScore, validateFixtureResult, type DuelInput } from '@kic
 import type { Prisma, PrismaClient } from '@prisma/client';
 import { AppError, notFound } from '../errors';
 import { activePlayerIds } from '../players/roster';
-import { withBracket, type BracketData } from '../tournaments/bracket-store';
+import { lockTournament, withBracket, type BracketData } from '../tournaments/bracket-store';
 import { findMatch, laterCompletedMatchIds, matchView } from '../tournaments/bracket-view';
 
 export interface SaveResultInput {
@@ -24,6 +24,7 @@ async function pruneStaleDrafts(tx: Prisma.TransactionClient, tournamentId: stri
 export async function saveResult(prisma: PrismaClient, tournamentId: string, matchId: number, input: SaveResultInput) {
   await prisma.$transaction(
     async (tx) => {
+      await lockTournament(tx, tournamentId);
       const tournament = await tx.tournament.findUnique({ where: { id: tournamentId } });
       if (!tournament) throw notFound('Campeonato');
       if (tournament.status !== 'in_progress') {

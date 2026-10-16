@@ -25,6 +25,18 @@ describe('teams', () => {
     expect(dup.json()).toMatchObject({ error: { code: 'TEAM_NAME_TAKEN' } });
   });
 
+  it('accepts only http(s) crest urls', async () => {
+    const cookie = await loginAdmin(app);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/teams',
+      headers: { cookie },
+      payload: { name: 'Leões', shortName: 'LEO', crestUrl: 'javascript:alert(1)' },
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toMatchObject({ error: { code: 'INVALID_REQUEST' } });
+  });
+
   it('updates a team', async () => {
     const cookie = await loginAdmin(app);
     const team = await createTeam(app, cookie, 'Leões');

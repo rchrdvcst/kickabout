@@ -32,7 +32,12 @@ export function stageInput(t: StageSource): InputStage {
       return {
         ...base,
         type: 'single_elimination',
-        settings: { size: nextPowerOfTwo(seeding.length), balanceByes: true, consolationFinal: t.options.consolationFinal },
+        settings: {
+          size: nextPowerOfTwo(seeding.length),
+          balanceByes: true,
+          // Com 3 times a disputa de 3º seria contra um BYE e nunca terminaria; o perdedor da semi já é o 3º.
+          consolationFinal: t.options.consolationFinal && seeding.length >= 4,
+        },
       };
     case 'double_elimination':
       return {

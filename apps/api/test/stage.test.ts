@@ -51,3 +51,11 @@ describe('normalizeOptions', () => {
     expect(normalizeOptions()).toEqual({ consolationFinal: false, grandFinalReset: false, roundRobinMode: 'simple' });
   });
 });
+
+describe('consolation final', () => {
+  it('is dropped below 4 teams, where it would be played against a bye', () => {
+    const options = normalizeOptions({ consolationFinal: true });
+    expect(stageInput({ id: 'x', name: 'C', format: 'single_elimination', options, entries: entries(3) }).settings?.consolationFinal).toBe(false);
+    expect(stageInput({ id: 'x', name: 'C', format: 'single_elimination', options, entries: entries(4) }).settings?.consolationFinal).toBe(true);
+  });
+});

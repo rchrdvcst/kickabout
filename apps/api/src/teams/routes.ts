@@ -11,7 +11,7 @@ import { completedFixtures, fixtureSummaries, toFixtureRecord } from '../stats/q
 const teamBody = z.object({
   name: z.string().trim().min(1).max(60),
   shortName: z.string().trim().min(1).max(5).toUpperCase(),
-  crestUrl: z.url().nullable().optional(),
+  crestUrl: z.url({ protocol: /^https?$/ }).nullable().optional(),
 });
 
 const nameTaken = () => new AppError(409, 'TEAM_NAME_TAKEN', 'Já existe um time com esse nome.');

@@ -10,13 +10,13 @@ import { saveResult } from './save-result';
 const tournamentParams = z.object({ id: z.string().min(1) });
 const fixtureParams = tournamentParams.extend({ matchId: z.coerce.number().int().min(0) });
 const duelSchema = z.object({
-  order: z.number(),
+  order: z.number().int(),
   playerAId: z.string().min(1),
   playerBId: z.string().min(1),
-  goalsA: z.number(),
-  goalsB: z.number(),
-  penaltiesA: z.number().nullable().optional(),
-  penaltiesB: z.number().nullable().optional(),
+  goalsA: z.number().int().min(0).max(99),
+  goalsB: z.number().int().min(0).max(99),
+  penaltiesA: z.number().int().min(0).max(99).nullable().optional(),
+  penaltiesB: z.number().int().min(0).max(99).nullable().optional(),
 });
 const resultBody = z.object({ mode: z.enum(['draft', 'final']), duels: z.array(duelSchema).max(6) });
 

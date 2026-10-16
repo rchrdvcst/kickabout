@@ -11,6 +11,11 @@ export async function managerFor(data: BracketData | null): Promise<BracketsMana
   return manager;
 }
 
+/** Trava a linha do campeonato até o fim da transação. Chame antes de ler o status. */
+export async function lockTournament(tx: Prisma.TransactionClient, tournamentId: string) {
+  await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id = ${tournamentId} FOR UPDATE`;
+}
+
 /**
  * Executa `fn` sobre o bracket do campeonato e grava o resultado.
  * Deve ser chamado dentro de `prisma.$transaction`: a linha do campeonato fica travada até o commit.
@@ -20,7 +25,7 @@ export async function withBracket<T>(
   tournamentId: string,
   fn: (manager: BracketsManager) => Promise<T>,
 ): Promise<T> {
-  await tx.$queryRaw`SELECT id FROM "Tournament" WHERE id = ${tournamentId} FOR UPDATE`;
+  await lockTournament(tx, tournamentId);
   const { bracket } = await tx.tournament.findUniqueOrThrow({ where: { id: tournamentId }, select: { bracket: true } });
   const manager = await managerFor(bracket as unknown as BracketData | null);
   const result = await fn(manager);

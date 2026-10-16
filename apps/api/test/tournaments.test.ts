@@ -91,6 +91,18 @@ describe('tournaments', () => {
     expect(entries.json()).toMatchObject({ error: { code: 'TOURNAMENT_LOCKED' } });
   });
 
+  it('starts only once under concurrent requests', async () => {
+    const cookie = await loginAdmin(app);
+    const list = await teams(cookie, 4);
+    const { id } = (await app.inject({ method: 'POST', url: '/api/tournaments', headers: { cookie }, payload: { name: 'C', format: 'single_elimination' } })).json();
+    await app.inject({ method: 'PUT', url: `/api/tournaments/${id}/entries`, headers: { cookie }, payload: { teamIds: list.map((t) => t.id) } });
+
+    const responses = await Promise.all([1, 2, 3].map(() => app.inject({ method: 'POST', url: `/api/tournaments/${id}/start`, headers: { cookie } })));
+    expect(responses.map((r) => r.statusCode).sort()).toEqual([200, 409, 409]);
+    const bracket = (await app.inject({ method: 'GET', url: `/api/tournaments/${id}/bracket` })).json();
+    expect(bracket.data.stage).toHaveLength(1);
+  });
+
   it('returns 404 for unknown tournaments', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/tournaments/nao-existe' });
     expect(res.statusCode).toBe(404);

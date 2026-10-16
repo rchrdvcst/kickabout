@@ -161,6 +161,28 @@ describe('result entry', () => {
     expect(after.filter((f) => f.scoreA === 3)).toHaveLength(3);
   });
 
+  it('lists a transferred player in the admin roster of a fixture he already played', async () => {
+    const { cookie, tournament, playersOf } = await setup('round_robin', 2);
+    const [f] = await fixtures(app, tournament.id);
+    const pA = playersOf(f!.teamA.id);
+    await saveResult(app, cookie, tournament.id, f!.matchId, 'final', duelsPayload(pA, playersOf(f!.teamB.id), A_WINS_3_1));
+    await app.inject({ method: 'PUT', url: `/api/players/${pA[0]!.id}/team`, headers: { cookie }, payload: { teamId: null } });
+
+    const detail = (await app.inject({ method: 'GET', url: `/api/tournaments/${tournament.id}/fixtures/${f!.matchId}`, headers: { cookie } })).json();
+    expect(detail.rosterA.map((p: { id: string }) => p.id)).toContain(pA[0]!.id);
+    expect(detail.rosterA).toHaveLength(6);
+  });
+
+  it('rejects out-of-range goal values instead of failing with 500', async () => {
+    const { cookie, tournament, playersOf } = await setup('round_robin', 2);
+    const [f] = await fixtures(app, tournament.id);
+    const duels = duelsPayload(playersOf(f!.teamA.id), playersOf(f!.teamB.id), A_WINS_3_1);
+    duels[0]!.goalsA = 1e10;
+    const res = await saveResult(app, cookie, tournament.id, f!.matchId, 'final', duels);
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toMatchObject({ error: { code: 'INVALID_REQUEST' } });
+  });
+
   it('still accepts a transferred player when editing an old result', async () => {
     const { cookie, tournament, playersOf } = await setup('round_robin', 2);
     const [f] = await fixtures(app, tournament.id);

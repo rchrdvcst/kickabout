@@ -83,6 +83,24 @@ describe('standings, stats and finish', () => {
     expect(titlesWithout.titles.map((t: { position: number }) => t.position).sort()).toEqual([1, 2]);
   });
 
+  it('finishes only once under concurrent requests', async () => {
+    const { cookie, tournament, playersOf } = await setup('single_elimination', 2);
+    await playAll(cookie, tournament.id, playersOf);
+    const responses = await Promise.all([1, 2, 3].map(() => finish(cookie, tournament.id)));
+    expect(responses.map((r) => r.statusCode).sort()).toEqual([200, 409, 409]);
+    const titles = (await app.inject({ method: 'GET', url: '/api/titles' })).json();
+    expect(titles.titles).toHaveLength(2);
+  });
+
+  it('finishes a 3-team single elimination that asked for a third place final', async () => {
+    const { cookie, tournament, playersOf } = await setup('single_elimination', 3, { consolationFinal: true });
+    await playAll(cookie, tournament.id, playersOf);
+    const res = await finish(cookie, tournament.id);
+    expect(res.json()).toMatchObject({ status: 'finished' });
+    const titles = (await app.inject({ method: 'GET', url: '/api/titles' })).json();
+    expect(titles.titles.map((t: { position: number }) => t.position).sort()).toEqual([1, 2, 3]);
+  });
+
   it('finishes non power-of-two brackets with byes', async () => {
     for (const format of ['single_elimination', 'double_elimination'] as const) {
       await resetDb();

@@ -8,7 +8,7 @@ import { idParams, teamRef, teamRefSelect, teamsById } from '../dto';
 import { AppError, notFound, parse } from '../errors';
 import { aggregatePlayerStats, computeStandings } from '@kickabout/shared';
 import { completedFixtures, toDuelInput, toFixtureRecord } from '../stats/queries';
-import { managerFor, withBracket, type BracketData } from './bracket-store';
+import { lockTournament, managerFor, withBracket, type BracketData } from './bracket-store';
 import { isStageComplete, teamIdByParticipant } from './bracket-view';
 import { eliminationPodium, roundRobinPodium, type PodiumEntry } from './podium';
 import { normalizeOptions, optionsSchema, type TournamentOptions } from './options';
@@ -112,6 +112,7 @@ export function registerTournamentRoutes(app: FastifyInstance, { prisma }: AppDe
     const { id } = parse(idParams, request.params);
     const { teamIds } = parse(entriesBody, request.body);
     await prisma.$transaction(async (tx) => {
+      await lockTournament(tx, id);
       const current = await loadTournament(tx, id);
       if (current.status !== 'draft') throw lockedError('As inscrições só podem ser alteradas antes do início.');
       const found = await tx.team.count({ where: { id: { in: teamIds } } });
@@ -125,6 +126,7 @@ export function registerTournamentRoutes(app: FastifyInstance, { prisma }: AppDe
   app.post('/tournaments/:id/start', { preHandler: requireAdmin }, async (request) => {
     const { id } = parse(idParams, request.params);
     await prisma.$transaction(async (tx) => {
+      await lockTournament(tx, id);
       const t = await loadTournament(tx, id);
       if (t.status !== 'draft') throw new AppError(409, 'TOURNAMENT_ALREADY_STARTED', 'O campeonato já foi iniciado.');
       const min = MIN_TEAMS[t.format];
@@ -188,6 +190,7 @@ export function registerTournamentRoutes(app: FastifyInstance, { prisma }: AppDe
   app.post('/tournaments/:id/finish', { preHandler: requireAdmin }, async (request) => {
     const { id } = parse(idParams, request.params);
     await prisma.$transaction(async (tx) => {
+      await lockTournament(tx, id);
       const t = await loadTournament(tx, id);
       if (t.status !== 'in_progress') throw new AppError(409, 'TOURNAMENT_NOT_IN_PROGRESS', 'O campeonato não está em andamento.');
       const data = t.bracket as unknown as BracketData;
