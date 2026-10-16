@@ -11,11 +11,12 @@ describe('normalizePhone', () => {
     ['0055 11 98765-4321', '+5511987654321'],
     ['55 98765-4321', '+5555987654321'], // DDD 55 (RS), sem código do país
     ['+351 912 345 678', '+351912345678'],
+    ['+55 (011) 98765-4321', '+5511987654321'], // zero do DDD após o +55
   ])('normalizes %s', (input, expected) => {
     expect(normalizePhone(input)).toBe(expected);
   });
 
-  it.each(['', '   ', '12345', '+1', '123456789012345678', 'abc'])('rejects %j', (input) => {
+  it.each(['', '   ', '12345', '+1', '123456789012345678', 'abc', '+55 123'])('rejects %j', (input) => {
     expect(normalizePhone(input)).toBeNull();
   });
 });
