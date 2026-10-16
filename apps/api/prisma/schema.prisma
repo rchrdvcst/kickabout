@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  role         String       @default("admin")
+  createdAt    DateTime     @default(now())
+  sessions     Session[]
+  teams        Team[]
+  tournaments  Tournament[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Team {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  shortName   String
+  crestUrl    String?
+  ownerId     String
+  owner       User              @relation(fields: [ownerId], references: [id])
+  createdAt   DateTime          @default(now())
+  memberships TeamMembership[]
+  entries     TournamentEntry[]
+  titles      Title[]
+  fixturesAsA Fixture[]         @relation("FixtureTeamA")
+  fixturesAsB Fixture[]         @relation("FixtureTeamB")
+  duelsAsA    Duel[]            @relation("DuelTeamA")
+  duelsAsB    Duel[]            @relation("DuelTeamB")
+}
+
+model Player {
+  id          String           @id @default(cuid())
+  name        String
+  phone       String           @unique
+  createdAt   DateTime         @default(now())
+  memberships TeamMembership[]
+  duelsAsA    Duel[]           @relation("DuelPlayerA")
+  duelsAsB    Duel[]           @relation("DuelPlayerB")
+}
+
+model TeamMembership {
+  id       String    @id @default(cuid())
+  teamId   String
+  team     Team      @relation(fields: [teamId], references: [id])
+  playerId String
+  player   Player    @relation(fields: [playerId], references: [id])
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
+
+  @@index([teamId, leftAt])
+  @@index([playerId, leftAt])
+}
+
+enum TournamentFormat {
+  single_elimination
+  double_elimination
+  round_robin
+}
+
+enum TournamentStatus {
+  draft
+  in_progress
+  finished
+}
+
+enum FixtureStatus {
+  draft
+  completed
+}
+
+model Tournament {
+  id         String            @id @default(cuid())
+  name       String
+  format     TournamentFormat
+  status     TournamentStatus  @default(draft)
+  options    Json
+  bracket    Json?
+  ownerId    String
+  owner      User              @relation(fields: [ownerId], references: [id])
+  createdAt  DateTime          @default(now())
+  startedAt  DateTime?
+  finishedAt DateTime?
+  entries    TournamentEntry[]
+  fixtures   Fixture[]
+  titles     Title[]
+}
+
+model TournamentEntry {
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId       String
+  team         Team       @relation(fields: [teamId], references: [id])
+  seed         Int
+
+  @@id([tournamentId, teamId])
+  @@unique([tournamentId, seed])
+}
+
+model Fixture {
+  id           String        @id @default(cuid())
+  tournamentId String
+  tournament   Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  bmMatchId    Int
+  teamAId      String
+  teamA        Team          @relation("FixtureTeamA", fields: [teamAId], references: [id])
+  teamBId      String
+  teamB        Team          @relation("FixtureTeamB", fields: [teamBId], references: [id])
+  status       FixtureStatus
+  isKnockout   Boolean
+  scoreA       Int?
+  scoreB       Int?
+  winnerTeamId String?
+  playedAt     DateTime?
+  updatedAt    DateTime      @updatedAt
+  duels        Duel[]
+
+  @@unique([tournamentId, bmMatchId])
+  @@index([status, playedAt])
+}
+
+model Duel {
+  id         String  @id @default(cuid())
+  fixtureId  String
+  fixture    Fixture @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  order      Int
+  playerAId  String
+  playerA    Player  @relation("DuelPlayerA", fields: [playerAId], references: [id])
+  playerBId  String
+  playerB    Player  @relation("DuelPlayerB", fields: [playerBId], references: [id])
+  teamAId    String
+  teamA      Team    @relation("DuelTeamA", fields: [teamAId], references: [id])
+  teamBId    String
+  teamB      Team    @relation("DuelTeamB", fields: [teamBId], references: [id])
+  goalsA     Int
+  goalsB     Int
+  penaltiesA Int?
+  penaltiesB Int?
+
+  @@unique([fixtureId, order])
+  @@index([playerAId])
+  @@index([playerBId])
+}
+
+model Title {
+  id             String      @id @default(cuid())
+  teamId         String
+  team           Team        @relation(fields: [teamId], references: [id])
+  tournamentId   String?
+  tournament     Tournament? @relation(fields: [tournamentId], references: [id], onDelete: SetNull)
+  tournamentName String
+  position       Int
+  year           Int
+  createdAt      DateTime    @default(now())
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@kickabout/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "start": "tsx --env-file=.env src/server.ts",
+    "create-admin": "tsx --env-file=.env src/scripts/create-admin.ts",
+    "db:migrate": "prisma migrate dev",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.0",
+    "@kickabout/shared": "*",
+    "@node-rs/argon2": "2.2.1",
+    "@prisma/client": "6.19.3",
+    "brackets-manager": "1.11.1",
+    "brackets-memory-db": "1.0.6",
+    "brackets-model": "1.7.0",
+    "fastify": "5.12.5",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "prisma": "6.19.3",
+    "tsx": "4.23.15"
+  }
+}
