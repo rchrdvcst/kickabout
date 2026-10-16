@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kickabout
+      POSTGRES_PASSWORD: kickabout
+      POSTGRES_DB: kickabout
+    ports:
+      - "5433:5432"
+    volumes:
+      - kickabout-db:/var/lib/postgresql/data
+      - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+
+volumes:
+  kickabout-db:
