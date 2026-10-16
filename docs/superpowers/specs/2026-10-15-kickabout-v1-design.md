@@ -72,7 +72,8 @@ kickabout/
 ### 3.2 Integração com brackets-manager.js (MIT)
 - Cada **confronto** corresponde a uma **match** do brackets-manager; o placar da match é o placar de duelos do confronto.
 - Formatos: `single_elimination` (opção de disputa de 3º lugar), `double_elimination` (opção de final com reset, `grandFinal: 'double'`), `round_robin` (turno único ou ida e volta).
-- Os dados do brackets-manager ficam em tabelas próprias (prefixo `bm_`), acessadas por um **adaptador de storage** que implementa a interface CRUD da biblioteca sobre o Prisma, para participar das mesmas transações.
+- O estado do brackets-manager de cada campeonato fica numa coluna JSON (`Tournament.bracket`). Cada operação abre uma transação, trava a linha do campeonato (`SELECT … FOR UPDATE`), carrega o JSON num banco em memória da biblioteca (`brackets-memory-db`), executa a operação e grava o JSON de volta na mesma transação.
+- A biblioteca só aceita chaves de eliminação com tamanho potência de 2: o Kickabout completa a chave com **BYEs** (`size` = próxima potência de 2, `balanceByes`).
 - A classificação do round robin é calculada pelo `shared` (critérios da seção 2.4), não pelo ranking padrão da biblioteca.
 - O front usa **brackets-viewer.js** (ISC) para desenhar chaves de mata-mata.
 
@@ -84,12 +85,11 @@ kickabout/
 | **Team** | id, name, shortName, crestUrl, ownerId | |
 | **Player** | id, name, phone (único, formato E.164 `+55…`) | Nome + celular identificam o jogador (usados no BID do time). Visibilidade do celular: ver seção 5.3. |
 | **TeamMembership** | id, teamId, playerId, joinedAt, leftAt? | Ativo quando `leftAt` é nulo. Limite de 20 ativos por time; 1 vínculo ativo por jogador. |
-| **Tournament** | id, name, format, status (`draft` → `in_progress` → `finished`), options (JSON: 3º lugar, reset na final, turnos), ownerId, bmStageId | |
+| **Tournament** | id, name, format, status (`draft` → `in_progress` → `finished`), options (JSON: 3º lugar, reset na final, turnos), ownerId, bracket (JSON do brackets-manager) | |
 | **TournamentEntry** | tournamentId, teamId, seed | Times inscritos. |
-| **Fixture** | id, tournamentId, bmMatchId, round, teamAId, teamBId, scoreA?, scoreB?, winnerTeamId?, status (`pending`, `draft`, `completed`), isKnockout, playedAt? | O confronto. |
+| **Fixture** | id, tournamentId, bmMatchId, teamAId, teamBId, scoreA?, scoreB?, winnerTeamId?, status (`draft`, `completed`), isKnockout, playedAt? | O confronto com resultado salvo. Confrontos sem resultado (`pending`) e a rodada vêm do bracket. |
 | **Duel** | id, fixtureId, order (1–6), playerAId, playerBId, teamAId, teamBId, goalsA, goalsB, penaltiesA?, penaltiesB? | `teamAId/teamBId` gravam o time do jogador no momento do jogo. Pênaltis só no `order = 6`. |
 | **Title** | id, teamId, tournamentId?, tournamentName, position (1, 2, 3), year | Gerado ao finalizar campeonato, ou cadastrado manualmente (histórico, sem `tournamentId`). |
-| **bm_*** | tabelas do brackets-manager (stage, group, round, match, match_game, participant) | Acesso via adaptador. |
 
 Estatísticas **não são armazenadas** como totais: são calculadas a partir de `Duel` e `Fixture` (status `completed`). Corrigir um resultado atualiza tudo automaticamente.
 
