@@ -16,7 +16,13 @@ export function TeamEditForm({ team }: { team: TeamRef }) {
 
   return (
     <form className="form" aria-label="Dados do time" onSubmit={submit}>
-      <TeamFields value={form} onChange={setForm} />
+      <TeamFields
+        value={form}
+        onChange={(value) => {
+          update.reset();
+          setForm(value);
+        }}
+      />
       <FormError error={update.error} />
       {update.isSuccess && (
         <p className="notice" role="status">

@@ -10,7 +10,7 @@ export interface SaveResultInput {
   duels: DuelInput[];
 }
 
-async function pruneStaleDrafts(tx: Prisma.TransactionClient, tournamentId: string, data: BracketData) {
+export async function pruneStaleDrafts(tx: Prisma.TransactionClient, tournamentId: string, data: BracketData) {
   const drafts = await tx.fixture.findMany({ where: { tournamentId, status: 'draft' } });
   for (const draft of drafts) {
     const raw = findMatch(data, draft.bmMatchId);
@@ -66,7 +66,7 @@ export async function saveResult(prisma: PrismaClient, tournamentId: string, mat
               throw new AppError(
                 409,
                 'RESULT_LOCKED',
-                'Este resultado não pode ser alterado: há confrontos seguintes com resultado lançado. Desfaça-os primeiro.',
+                'Este resultado não pode ser alterado: há confrontos seguintes com resultado lançado. Reabra-os primeiro.',
                 { blockingMatchIds: laterCompletedMatchIds(data, matchId) },
               );
             }

@@ -37,4 +37,10 @@ describe('layout', () => {
     renderRoute('/rota-que-nao-existe');
     expect(await screen.findByRole('link', { name: 'Área do organizador' })).toHaveAttribute('href', '/admin');
   });
+  it('shows the Kickabout logo as the home link', async () => {
+    mockApi({});
+    renderRoute('/rota-que-nao-existe');
+    const home = await screen.findByRole('link', { name: 'Kickabout, início' });
+    expect(home.querySelector('img')).toHaveAttribute('src', '/logo.png');
+  });
 });

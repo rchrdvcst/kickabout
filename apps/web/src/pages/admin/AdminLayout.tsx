@@ -3,6 +3,7 @@ import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-route
 import { logout } from '../../api/admin';
 import { useMe } from '../../api/queries';
 import { forgetSession } from '../../api/session';
+import { FormError } from '../../components/FormError';
 import { QueryState } from '../../components/QueryState';
 
 /** Tudo em /admin exige login; sem sessão, vai para /entrar e volta para cá depois. */
@@ -35,6 +36,7 @@ export function AdminLayout() {
                 Sair
               </button>
             </div>
+            <FormError error={exit.error} />
             <Outlet />
           </>
         ) : exit.isPending || exit.isSuccess ? null : (

@@ -60,6 +60,8 @@ export const finishTournament = (id: string) => apiRequest<Tournament>('POST', `
 
 export const saveResult = (id: string, matchId: number, mode: 'draft' | 'final', duels: DuelInput[]) =>
   apiRequest<FixtureDetail>('PUT', `/tournaments/${id}/fixtures/${matchId}/result`, { mode, duels });
+export const reopenResult = (id: string, matchId: number) =>
+  apiRequest<FixtureDetail>('POST', `/tournaments/${id}/fixtures/${matchId}/reopen`);
 
 export const createTitle = (input: TitleInput) => apiRequest<TitleEntry>('POST', '/titles', input);
 export const deleteTitle = (id: string) => apiRequest<{ ok: true }>('DELETE', `/titles/${id}`);

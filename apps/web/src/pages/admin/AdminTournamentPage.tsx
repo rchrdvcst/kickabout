@@ -62,7 +62,13 @@ function SettingsForm({ tournament }: { tournament: Tournament }) {
   return (
     <form className="form" aria-label="Configuração" onSubmit={submit}>
       <h2>Configuração</h2>
-      <TournamentFields value={form} onChange={setForm} />
+      <TournamentFields
+        value={form}
+        onChange={(value) => {
+          update.reset();
+          setForm(value);
+        }}
+      />
       <FormError error={update.error} />
       {update.isSuccess && (
         <p className="notice" role="status">
@@ -91,7 +97,10 @@ function RenameForm({ tournament }: { tournament: Tournament }) {
     <form className="form" aria-label="Nome do campeonato" onSubmit={submit}>
       <label className="field">
         <span>Nome</span>
-        <input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
+        <input required maxLength={80} value={name} onChange={(e) => {
+            update.reset();
+            setName(e.target.value);
+          }} />
       </label>
       <FormError error={update.error} />
       {update.isSuccess && (

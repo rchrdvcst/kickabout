@@ -44,8 +44,12 @@ export const useStandings = (id: string) =>
 export const useTournamentStats = (id: string) =>
   useQuery({ queryKey: ['tournament', id, 'stats'], queryFn: () => apiGet<LeaderboardRow[]>(`/tournaments/${id}/stats`) });
 
-export const useFixture = (id: string, matchId: number) =>
-  useQuery({ queryKey: ['tournament', id, 'fixture', matchId], queryFn: () => apiGet<FixtureDetail>(`/tournaments/${id}/fixtures/${matchId}`) });
+export const useFixture = (id: string, matchId: number, enabled = true) =>
+  useQuery({
+    queryKey: ['tournament', id, 'fixture', matchId],
+    queryFn: () => apiGet<FixtureDetail>(`/tournaments/${id}/fixtures/${matchId}`),
+    enabled,
+  });
 
 export const useTeams = () => useQuery({ queryKey: ['teams'], queryFn: () => apiGet<TeamSummary[]>('/teams') });
 

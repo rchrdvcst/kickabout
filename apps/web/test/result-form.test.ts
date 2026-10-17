@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   duelsToSend,
   emptyRow,
+  invalidScoreLabels,
   liveScore,
   penaltiesNeeded,
   playerOptions,
@@ -72,5 +73,12 @@ describe('result form', () => {
     const rows = [...five(NOT_TIED), row('a1', 'b1', '1', '0')];
     expect(duelsToSend(rows, true)).toHaveLength(5);
     expect(liveScore(rows, true)).toEqual({ scoreA: 3, scoreB: 1, winner: 'A' });
+  });
+
+  it('names the duels whose score is not a number from 0 to 99', () => {
+    const rows = [row('a1', 'b1', 'a', '0'), row('', '', '', ''), row('a3', '', '-1', ''), emptyRow(), emptyRow(), row('a1', 'b1', '1', '1', 'x', '4')];
+    expect(invalidScoreLabels(rows, false)).toEqual(['1º duelo', '3º duelo']);
+    expect(invalidScoreLabels(rows, true)).toEqual(['1º duelo', '3º duelo', 'Desempate']);
+    expect(invalidScoreLabels([row('a1', 'b1', '2', '0'), emptyRow(), emptyRow(), emptyRow(), emptyRow(), row('a1', 'b1', '2', '1', 'x', '')], true)).toEqual([]);
   });
 });

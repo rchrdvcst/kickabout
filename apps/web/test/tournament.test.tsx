@@ -49,7 +49,7 @@ const fixture = (overrides: Partial<FixtureListItem>): FixtureListItem => ({
 });
 
 beforeEach(() => {
-  vi.stubGlobal('bracketsViewer', { render: vi.fn().mockResolvedValue(undefined) });
+  vi.stubGlobal('bracketsViewer', { render: vi.fn().mockResolvedValue(undefined), addLocale: vi.fn().mockResolvedValue(undefined) });
 });
 
 describe('tournament page', () => {
@@ -63,6 +63,19 @@ describe('tournament page', () => {
     const [data, config] = vi.mocked(window.bracketsViewer.render).mock.calls[0]!;
     expect(data).toMatchObject({ stages: bracket.stage, matches: [], participants: [] });
     expect(config).toMatchObject({ clear: true, selector: expect.stringMatching(/^#bracket-/) });
+  });
+
+  it('labels the bracket groups in Portuguese before drawing', async () => {
+    mockApi({ '/tournaments/c1': tournament({ format: 'double_elimination' }), '/tournaments/c1/bracket': { data: bracket } });
+    renderRoute('/campeonatos/c1');
+    await waitFor(() => expect(window.bracketsViewer.render).toHaveBeenCalledTimes(1));
+    const labels = expect.objectContaining({
+      common: expect.objectContaining({ 'group-name-winner-bracket': 'Chave superior', 'group-name-loser-bracket': 'Chave inferior' }),
+    });
+    expect(window.bracketsViewer.addLocale).toHaveBeenCalledWith('en', labels);
+    expect(vi.mocked(window.bracketsViewer.addLocale).mock.invocationCallOrder[0]!).toBeLessThan(
+      vi.mocked(window.bracketsViewer.render).mock.invocationCallOrder[0]!,
+    );
   });
 
   it('shows the standings table for round robin', async () => {

@@ -95,3 +95,15 @@ export function playerOptions(roster: PlayerRef[], rows: DuelRow[], side: 'A' | 
   );
   return roster.filter((player) => !taken.has(player.id));
 }
+
+const isBadNumber = (value: string) => value.trim() !== '' && toInt(value) === null;
+
+/** Duelos com gols (ou pênaltis visíveis) que não são números de 0 a 99: o envio os ignoraria em silêncio. */
+export function invalidScoreLabels(rows: DuelRow[], includeTiebreak: boolean): string[] {
+  return rows.flatMap((row, index) => {
+    const tiebreak = index === TIEBREAK_INDEX;
+    if (tiebreak && !includeTiebreak) return [];
+    const fields = tiebreak && penaltiesNeeded(row) ? [row.goalsA, row.goalsB, row.penaltiesA, row.penaltiesB] : [row.goalsA, row.goalsB];
+    return fields.some(isBadNumber) ? [tiebreak ? 'Desempate' : `${index + 1}º duelo`] : [];
+  });
+}

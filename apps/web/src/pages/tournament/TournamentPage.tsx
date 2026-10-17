@@ -36,7 +36,9 @@ export function TournamentPage() {
             </header>
             <Tabs param="aba" items={tabs} current={current} label="Seções do campeonato" />
             {notStarted ? (
-              <p className="state">A chave aparece quando o campeonato começar.</p>
+              <p className="state">
+                {t.format === 'round_robin' ? 'A tabela aparece quando o campeonato começar.' : 'A chave aparece quando o campeonato começar.'}
+              </p>
             ) : current === 'chave' ? (
               t.format === 'round_robin' ? <StandingsTab id={t.id} /> : <BracketTab id={t.id} />
             ) : current === 'jogos' ? (

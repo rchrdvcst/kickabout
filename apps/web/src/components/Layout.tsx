@@ -5,7 +5,7 @@ export function Layout() {
     <div className="shell">
       <header className="topbar">
         <Link to="/" className="wordmark" aria-label="Kickabout, início">
-          kickabout
+          <img src="/logo.png" alt="" width={60} height={40} />
         </Link>
         <nav aria-label="Principal" className="mainnav">
           <NavLink to="/campeonatos">Campeonatos</NavLink>

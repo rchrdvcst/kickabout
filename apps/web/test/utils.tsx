@@ -1,8 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 import { vi } from 'vitest';
 import { routes } from '../src/router';
+import { createQueryClient } from '../src/api/query-client';
 
 /** Valor fixo, `Response` (devolvida como está) ou função que recebe o corpo JSON enviado. */
 export type ApiRoutes = Record<string, unknown>;
@@ -48,7 +49,7 @@ export function sentBodies(fetchMock: FetchMock, key: string): unknown[] {
 }
 
 export function renderRoute(path: string) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const client = createQueryClient({ retry: false, staleTime: 0 });
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   const view = render(
     <QueryClientProvider client={client}>

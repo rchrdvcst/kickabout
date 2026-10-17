@@ -5,6 +5,7 @@ import { DuelStrip } from '../components/DuelStrip';
 import { QueryState } from '../components/QueryState';
 import { Scoreboard } from '../components/Scoreboard';
 import { outcomeOf, roundCounts, roundLabel } from '../lib/format';
+import { NotFoundPage } from './NotFoundPage';
 
 function DuelItem({ duel }: { duel: DuelView }) {
   const outcome = outcomeOf(duel);
@@ -32,10 +33,13 @@ function DuelItem({ duel }: { duel: DuelView }) {
 
 export function FixturePage() {
   const { id = '', matchId = '' } = useParams();
-  const fixture = useFixture(id, Number(matchId));
+  const valid = /^\d+$/.test(matchId);
+  const fixture = useFixture(id, Number(matchId), valid);
   const tournament = useTournament(id);
   const bracket = useBracket(id);
   const me = useMe();
+
+  if (!valid) return <NotFoundPage />;
 
   return (
     <QueryState query={fixture}>
@@ -53,7 +57,7 @@ export function FixturePage() {
             <h1 className="visually-hidden">
               {f.teamA.name} contra {f.teamB.name}
             </h1>
-            {me.data?.user && (
+            {me.data?.user && tournament.data?.status === 'in_progress' && (
               <p>
                 <Link to={`/admin/campeonatos/${id}/jogos/${f.matchId}`} className="button-link">
                   {f.status === 'completed' ? 'Corrigir resultado' : 'Lançar resultado'}

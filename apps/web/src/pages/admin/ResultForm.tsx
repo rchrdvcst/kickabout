@@ -1,16 +1,18 @@
 import { validateFixtureResult, type DuelInput } from '@kickabout/shared';
 import { useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
-import { saveResult } from '../../api/admin';
+import { reopenResult, saveResult } from '../../api/admin';
 import { ApiError } from '../../api/client';
 import { useApiMutation } from '../../api/mutation';
 import { useTournamentFixtures } from '../../api/queries';
 import type { FixtureDetail, PlayerRef } from '../../api/types';
+import { ConfirmButton } from '../../components/ConfirmButton';
 import { FormError } from '../../components/FormError';
 import { Scoreboard } from '../../components/Scoreboard';
 import {
   TIEBREAK_INDEX,
   duelsToSend,
+  invalidScoreLabels,
   liveScore,
   penaltiesNeeded,
   playerOptions,
@@ -28,6 +30,12 @@ interface Props {
   rosterB: PlayerRef[];
 }
 
+/** Confrontos que precisam ser reabertos antes (erro RESULT_LOCKED). */
+const blockingOf = (error: unknown): number[] =>
+  error instanceof ApiError && error.code === 'RESULT_LOCKED'
+    ? ((error.details as { blockingMatchIds?: number[] } | undefined)?.blockingMatchIds ?? [])
+    : [];
+
 export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
   const [rows, setRows] = useState(() => rowsFromDuels(fixture.duels));
   const [issues, setIssues] = useState<string[]>([]);
@@ -35,6 +43,7 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
   const busy = useRef(false);
   const fixtures = useTournamentFixtures(tournamentId);
   const save = useApiMutation((vars: { mode: Mode; duels: DuelInput[] }) => saveResult(tournamentId, fixture.matchId, vars.mode, vars.duels));
+  const reopen = useApiMutation(() => reopenResult(tournamentId, fixture.matchId));
 
   const knockout = fixture.isKnockout;
   const showTiebreak = tiebreakNeeded(rows, knockout);
@@ -49,6 +58,11 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
 
   const send = (mode: Mode) => {
     if (busy.current) return;
+    const invalid = invalidScoreLabels(rows, showTiebreak);
+    if (invalid.length > 0) {
+      setIssues([`Placar inválido em ${invalid.join(', ')}: use números de 0 a 99.`]);
+      return;
+    }
     const duels = duelsToSend(rows, knockout);
     if (mode === 'final') {
       const found = validateFixtureResult({
@@ -76,10 +90,7 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
     );
   };
 
-  const blocking =
-    save.error instanceof ApiError && save.error.code === 'RESULT_LOCKED'
-      ? ((save.error.details as { blockingMatchIds?: number[] } | undefined)?.blockingMatchIds ?? [])
-      : [];
+  const blocking = [save.error, reopen.error].map(blockingOf).find((ids) => ids.length > 0) ?? [];
   const fixtureName = (matchId: number) => {
     const found = fixtures.data?.find((item) => item.matchId === matchId);
     return found ? `${found.teamA.name} × ${found.teamB.name}` : `Confronto ${matchId}`;
@@ -131,9 +142,9 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
           </ul>
         </div>
       )}
-      <FormError error={save.error} />
+      <FormError error={save.error ?? reopen.error} />
       {blocking.length > 0 && (
-        <ul className="list" aria-label="Confrontos que precisam ser desfeitos antes">
+        <ul className="list" aria-label="Confrontos que precisam ser reabertos antes">
           {blocking.map((matchId) => (
             <li key={matchId}>
               <Link to={`/admin/campeonatos/${tournamentId}/jogos/${matchId}`} className="row-link">
@@ -155,11 +166,23 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
             Salvar rascunho
           </button>
         )}
-        <button type="submit" className="button" disabled={save.isPending}>
+        <button type="submit" className="button" disabled={save.isPending || reopen.isPending}>
           Confirmar resultado
         </button>
+        {fixture.status === 'completed' && (
+          <ConfirmButton
+            label="Reabrir confronto"
+            confirmLabel="Confirmar: o resultado volta a rascunho"
+            disabled={reopen.isPending || save.isPending}
+            onConfirm={() => reopen.mutate(undefined, { onSuccess: () => setSaved(null) })}
+          />
+        )}
       </div>
-      <p className="muted">O rascunho guarda só os duelos completos (jogadores e placar) e não conta nas estatísticas nem na chave.</p>
+      {fixture.status === 'completed' ? (
+        <p className="muted">Reabrir tira o resultado da chave, da classificação e das estatísticas até ele ser confirmado de novo.</p>
+      ) : (
+        <p className="muted">O rascunho guarda só os duelos completos (jogadores e placar) e não conta nas estatísticas nem na chave.</p>
+      )}
     </form>
   );
 }

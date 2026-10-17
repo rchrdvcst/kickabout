@@ -73,6 +73,10 @@ export function HomePage() {
           {(list) => <TournamentList items={list} />}
         </QueryState>
       </section>
+
+      <p>
+        <Link to="/titulos">Ver campeões e ranking de títulos</Link>
+      </p>
     </>
   );
 }

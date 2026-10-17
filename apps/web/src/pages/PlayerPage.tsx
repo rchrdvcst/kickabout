@@ -84,7 +84,7 @@ export function PlayerPage() {
               <h2>Títulos</h2>
               <ul className="list">
                 {data.titles.map((title) => (
-                  <li key={`${title.tournamentId}-${title.position}`} className="row-link">
+                  <li key={`${title.tournamentId ?? title.tournamentName}-${title.year}-${title.position}-${title.team.id}`} className="row-link">
                     <span className={title.position === 1 ? 'chip chip-win' : 'chip'}>{positionLabel(title.position)}</span>
                     <span className="row-title">{title.tournamentName}</span>
                     <span className="row-meta">

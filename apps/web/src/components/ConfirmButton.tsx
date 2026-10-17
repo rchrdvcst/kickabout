@@ -25,6 +25,7 @@ export function ConfirmButton({ label, confirmLabel, onConfirm, disabled, danger
     <span className="confirm">
       <button
         type="button"
+        autoFocus
         className={className}
         disabled={disabled}
         onClick={() => {
