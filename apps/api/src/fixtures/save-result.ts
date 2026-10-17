@@ -10,7 +10,7 @@ export interface SaveResultInput {
   duels: DuelInput[];
 }
 
-async function pruneStaleDrafts(tx: Prisma.TransactionClient, tournamentId: string, data: BracketData) {
+export async function pruneStaleDrafts(tx: Prisma.TransactionClient, tournamentId: string, data: BracketData) {
   const drafts = await tx.fixture.findMany({ where: { tournamentId, status: 'draft' } });
   for (const draft of drafts) {
     const raw = findMatch(data, draft.bmMatchId);
@@ -20,6 +20,14 @@ async function pruneStaleDrafts(tx: Prisma.TransactionClient, tournamentId: stri
     }
   }
 }
+
+export const resultLockedError = (blockingMatchIds: number[]) =>
+  new AppError(
+    409,
+    'RESULT_LOCKED',
+    'Este resultado não pode ser alterado: há confrontos seguintes com resultado lançado. Reabra-os primeiro.',
+    { blockingMatchIds },
+  );
 
 export async function saveResult(prisma: PrismaClient, tournamentId: string, matchId: number, input: SaveResultInput) {
   await prisma.$transaction(
@@ -44,6 +52,12 @@ export async function saveResult(prisma: PrismaClient, tournamentId: string, mat
         if (input.mode === 'draft' && existing?.status === 'completed') {
           throw new AppError(409, 'FIXTURE_ALREADY_COMPLETED', 'Este confronto já tem resultado confirmado.');
         }
+        // A biblioteca só recusa a correção quando a partida seguinte está arquivada; depois de reabrir essa partida,
+        // ela aceitaria mudar o vencedor mesmo com o perdedor já tendo jogado (3º lugar, chave inferior). Por isso a checagem própria.
+        if (input.mode === 'final' && isKnockout && existing?.status === 'completed') {
+          const blocking = laterCompletedMatchIds(data, matchId);
+          if (blocking.length > 0) throw resultLockedError(blocking);
+        }
 
         const [activeA, activeB] = await Promise.all([activePlayerIds(tx, view.teamAId), activePlayerIds(tx, view.teamBId)]);
         const rosterA = [...activeA, ...(existing?.duels.map((d) => d.playerAId) ?? [])];
@@ -62,14 +76,7 @@ export async function saveResult(prisma: PrismaClient, tournamentId: string, mat
               opponent2: { score: score.scoreB, result: result('B') },
             });
           } catch (error) {
-            if (error instanceof Error && /locked/i.test(error.message)) {
-              throw new AppError(
-                409,
-                'RESULT_LOCKED',
-                'Este resultado não pode ser alterado: há confrontos seguintes com resultado lançado. Desfaça-os primeiro.',
-                { blockingMatchIds: laterCompletedMatchIds(data, matchId) },
-              );
-            }
+            if (error instanceof Error && /locked/i.test(error.message)) throw resultLockedError(laterCompletedMatchIds(data, matchId));
             throw error;
           }
         }

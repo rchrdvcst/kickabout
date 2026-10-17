@@ -59,7 +59,7 @@ export function isStageComplete(data: BracketData): boolean {
   );
 }
 
-/** Partidas posteriores, já com resultado, que envolvem algum dos times da partida informada. */
+/** Partidas posteriores, já com resultado e sem BYE, que envolvem algum dos times da partida informada. */
 export function laterCompletedMatchIds(data: BracketData, matchId: number): number[] {
   const match = findMatch(data, matchId);
   if (!match) return [];
@@ -71,6 +71,8 @@ export function laterCompletedMatchIds(data: BracketData, matchId: number): numb
       (other) =>
         Number(other.id) > matchId &&
         other.status >= MATCH_STATUS.Completed &&
+        other.opponent1?.id != null &&
+        other.opponent2?.id != null &&
         [other.opponent1?.id, other.opponent2?.id].some((id) => id != null && participants.has(Number(id))),
     )
     .map((other) => Number(other.id));

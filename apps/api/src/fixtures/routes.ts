@@ -6,6 +6,7 @@ import { parse } from '../errors';
 import { completedFixtures, fixtureSummaries } from '../stats/queries';
 import { getFixtureDetail, listFixtures } from './detail';
 import { saveResult } from './save-result';
+import { reopenResult } from './reopen-result';
 
 const tournamentParams = z.object({ id: z.string().min(1) });
 const fixtureParams = tournamentParams.extend({ matchId: z.coerce.number().int().min(0) });
@@ -35,6 +36,12 @@ export function registerFixtureRoutes(app: FastifyInstance, { prisma }: AppDeps)
     const { id, matchId } = parse(fixtureParams, request.params);
     const body = parse(resultBody, request.body);
     await saveResult(prisma, id, matchId, body);
+    return getFixtureDetail(prisma, id, matchId, true);
+  });
+
+  app.post('/tournaments/:id/fixtures/:matchId/reopen', { preHandler: requireAdmin }, async (request) => {
+    const { id, matchId } = parse(fixtureParams, request.params);
+    await reopenResult(prisma, id, matchId);
     return getFixtureDetail(prisma, id, matchId, true);
   });
 

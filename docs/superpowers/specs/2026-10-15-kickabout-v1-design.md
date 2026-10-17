@@ -132,7 +132,7 @@ Mobile-first em todas as telas.
 
 ### 6.1 Correções
 - **Round robin:** edição livre; estatísticas e classificação se recalculam.
-- **Mata-mata:** edição permitida apenas enquanto os confrontos seguintes que dependem dele (o do vencedor e, na eliminatória dupla, também o do perdedor na chave inferior) não tiverem resultado confirmado. Caso contrário, a API retorna erro listando os confrontos que precisam ser desfeitos antes.
+- **Mata-mata:** edição permitida apenas enquanto os confrontos seguintes que dependem dele (o do vencedor e, na eliminatória dupla, também o do perdedor na chave inferior) não tiverem resultado confirmado. Caso contrário, a API retorna erro listando os confrontos que precisam ser desfeitos antes. Para desfazer, o admin **reabre** o confronto seguinte (`POST /tournaments/:id/fixtures/:matchId/reopen`): o resultado volta a rascunho (duelos mantidos), sai da chave, da classificação e das estatísticas, e libera a correção do anterior. Só com o campeonato em andamento.
 
 ### 6.2 Finalização
 Ao terminar todos os confrontos, o admin finaliza o campeonato: status `finished` e geração dos registros de **Title** (1º, 2º e, quando houver, 3º).
