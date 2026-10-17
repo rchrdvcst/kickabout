@@ -4,6 +4,28 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.4 — 2026-10-17
+
+Cadastro de jogadores mais rápido e com suporte a estrangeiros.
+
+- **Lista de jogadores do admin:** do cadastro mais recente para o mais antigo, também na busca.
+- **Celular com país:**
+  - o campo virou uma lista de países (bandeira, nome e código, com o Brasil +55 primeiro e como padrão) mais o número, com a máscara do país enquanto se digita;
+  - o Brasil usa (84) 9677-3612 com 8 dígitos e (84) 99677-3612 com 9; os outros países usam a máscara da biblioteca `libphonenumber-js`;
+  - colar um número com "+" e o código do país (por exemplo +351 912 345 678) troca o país sozinho;
+  - número que não pode existir no país escolhido mostra "Número inválido para <país>." ao sair do campo;
+  - celulares brasileiros antigos, com 8 dígitos depois do DDD (+55 84 9677-3612), continuam aceitos;
+  - números estrangeiros aparecem no formato internacional na lista e no BID (+351 912 345 678).
+- **Cadastro em massa por JSON:**
+  - na tela de Jogadores, o bloco "Cadastrar em massa" deixa colar uma lista ou escolher um arquivo `.json` com `nome`, `celular` e, opcional, `time` (tag ou nome do time), até 200 por vez;
+  - os válidos são salvos;
+  - os que falham aparecem com linha, nome e motivo: celular inválido, celular já cadastrado, celular repetido no arquivo, time que não existe, tag usada por dois times (aí é preciso usar o nome) ou elenco cheio;
+  - JSON malformado ou que não é uma lista é recusado com uma mensagem, sem chamar o servidor;
+  - endpoint novo na API: `POST /players/bulk`.
+- **Tamanho do site:** a biblioteca de telefone soma uns 40 KB compactados.
+
+---
+
 ## v1.3 — 2026-10-17
 
 Ajustes para celular pedidos depois da revisão de design.

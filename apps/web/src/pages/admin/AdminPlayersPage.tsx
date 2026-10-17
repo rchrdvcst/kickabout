@@ -5,8 +5,10 @@ import { useApiMutation } from '../../api/mutation';
 import { useAdminPlayers, useTeams } from '../../api/queries';
 import type { AdminPlayer, TeamSummary } from '../../api/types';
 import { FormError } from '../../components/FormError';
+import { PhoneField } from '../../components/PhoneField';
 import { QueryState } from '../../components/QueryState';
 import { formatPhone } from '../../lib/format';
+import { BulkPlayers } from './players/BulkPlayers';
 
 export function AdminPlayersPage() {
   const [search, setSearch] = useState('');
@@ -52,6 +54,7 @@ export function AdminPlayersPage() {
         )}
       </QueryState>
       <NewPlayer teams={teamList} />
+      <BulkPlayers />
     </>
   );
 }
@@ -73,12 +76,11 @@ function TeamSelect({ label, teams, value, onChange }: { label: string; teams: T
 }
 
 function PlayerEditor({ player, teams, onDone }: { player: AdminPlayer; teams: TeamSummary[]; onDone: () => void }) {
-  const initialPhone = formatPhone(player.phone);
   const [name, setName] = useState(player.name);
-  const [phone, setPhone] = useState(initialPhone);
+  const [phone, setPhone] = useState(player.phone);
   const [teamId, setTeamId] = useState(player.team?.id ?? '');
   const save = useApiMutation(async () => {
-    if (name !== player.name || phone !== initialPhone) await updatePlayer(player.id, { name, phone });
+    if (name !== player.name || phone !== player.phone) await updatePlayer(player.id, { name, phone });
     const target = teamId === '' ? null : teamId;
     if (target !== (player.team?.id ?? null)) await setPlayerTeam(player.id, target);
   });
@@ -94,10 +96,7 @@ function PlayerEditor({ player, teams, onDone }: { player: AdminPlayer; teams: T
         <span>Nome</span>
         <input required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
       </label>
-      <label className="field">
-        <span>Celular com DDD</span>
-        <input type="tel" inputMode="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} />
-      </label>
+      <PhoneField label="Celular" required value={phone} onChange={setPhone} />
       <TeamSelect label="Time" teams={teams} value={teamId} onChange={setTeamId} />
       <FormError error={save.error} />
       <div className="actions">
@@ -139,10 +138,7 @@ function NewPlayer({ teams }: { teams: TeamSummary[] }) {
           <span>Nome</span>
           <input required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} />
         </label>
-        <label className="field">
-          <span>Celular com DDD</span>
-          <input type="tel" inputMode="tel" required placeholder="(11) 98765-4321" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </label>
+        <PhoneField label="Celular" required value={phone} onChange={setPhone} />
         <TeamSelect label="Time (opcional)" teams={teams} value={teamId} onChange={setTeamId} />
         <FormError error={create.error} />
         <div className="actions">
