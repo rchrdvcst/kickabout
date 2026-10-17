@@ -10,12 +10,17 @@
     "node": ">=20"
   },
   "scripts": {
+    "dev:api": "npm run dev -w @kickabout/api",
+    "dev:web": "npm run dev -w @kickabout/web",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "@vitejs/plugin-react": "6.1.1",
+    "jsdom": "30.1.1",
+    "vite": "8.3.1"
   },
   "overrides": {
     "uuid": "11.1.1",
