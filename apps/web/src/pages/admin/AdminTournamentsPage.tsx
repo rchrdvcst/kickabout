@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { createTournament, type TournamentInput } from '../../api/admin';
 import { useApiMutation } from '../../api/mutation';
 import { useTournaments } from '../../api/queries';
@@ -11,6 +11,7 @@ import { TournamentFields } from './tournament/TournamentFields';
 export function AdminTournamentsPage() {
   const tournaments = useTournaments();
   const navigate = useNavigate();
+  const notice = (useLocation().state as { notice?: string } | null)?.notice;
   const [form, setForm] = useState<TournamentInput>({ name: '', format: 'single_elimination', options: {} });
   const create = useApiMutation(createTournament);
 
@@ -22,6 +23,11 @@ export function AdminTournamentsPage() {
   return (
     <>
       <h1>Campeonatos</h1>
+      {notice && (
+        <p className="notice" role="status">
+          {notice}
+        </p>
+      )}
       <QueryState query={tournaments} isEmpty={(list) => list.length === 0} empty={<p className="state">Nenhum campeonato criado ainda.</p>}>
         {(list) => (
           <ul className="list">

@@ -9,6 +9,7 @@ import { FormError } from '../../components/FormError';
 import { QueryState } from '../../components/QueryState';
 import { FORMAT_LABEL, STATUS_LABEL } from '../../lib/format';
 import { FixturesTab } from '../tournament/FixturesTab';
+import { DeleteTournament } from './tournament/DeleteTournament';
 import { EntriesEditor } from './tournament/EntriesEditor';
 import { KnockoutDraw } from './tournament/KnockoutDraw';
 import { TournamentFields } from './tournament/TournamentFields';
@@ -28,9 +29,7 @@ export function AdminTournamentPage() {
             </p>
           </header>
           {t.status === 'draft' ? (
-            <>
-              <DraftSetup tournament={t} />
-            </>
+            <DraftSetup tournament={t} />
           ) : (
             <>
               <p className="muted">Abra um confronto para lançar ou corrigir o resultado.</p>
@@ -48,6 +47,7 @@ export function AdminTournamentPage() {
               </details>
             </>
           )}
+          <DeleteTournament key={t.id} tournament={t} />
         </>
       )}
     </QueryState>

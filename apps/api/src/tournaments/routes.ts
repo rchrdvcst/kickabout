@@ -145,6 +145,17 @@ export function registerTournamentRoutes(app: FastifyInstance, { prisma }: AppDe
     return tournamentDto(await loadTournament(prisma, id));
   });
 
+  /** Apaga o campeonato com inscrições, confrontos e duelos (cascata); os títulos ficam, sem o vínculo. */
+  app.delete('/tournaments/:id', { preHandler: requireAdmin }, async (request, reply) => {
+    const { id } = parse(idParams, request.params);
+    await prisma.$transaction(async (tx) => {
+      await lockTournament(tx, id);
+      await loadTournament(tx, id);
+      await tx.tournament.delete({ where: { id } });
+    });
+    return reply.status(204).send();
+  });
+
   app.put('/tournaments/:id/entries', { preHandler: requireAdmin }, async (request) => {
     const { id } = parse(idParams, request.params);
     const { teamIds } = parse(entriesBody, request.body);

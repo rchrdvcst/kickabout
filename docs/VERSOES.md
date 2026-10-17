@@ -4,6 +4,22 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.6 — 2026-10-17
+
+O organizador pode excluir um campeonato.
+
+- **Onde:** no fim da página do campeonato no admin, o bloco recolhido "Excluir campeonato" aparece em qualquer situação: em preparação, em andamento ou encerrado.
+- **Confirmação:**
+  - o texto diz o que será apagado, por exemplo "Isto apaga o campeonato, 14 confrontos e as estatísticas desses jogos.";
+  - é preciso clicar em "Excluir campeonato" e depois em "Excluir de vez" (ou "Cancelar");
+  - se algum confronto já tiver resultado, confirmado ou em rascunho, o botão só libera depois de digitar o nome exato do campeonato.
+- **O que some:** o campeonato, as inscrições, os confrontos e os duelos, e com eles as estatísticas desses jogos. Times e jogadores continuam cadastrados.
+- **O que fica:** os títulos de um campeonato encerrado continuam no histórico e no ranking, com o nome do campeonato. Na tela Títulos do admin, eles passam a aparecer como os títulos manuais e podem ser apagados.
+- **Depois de excluir:** o admin volta para a lista de campeonatos com o aviso "Campeonato excluído.". Um link antigo para o campeonato mostra a página de não encontrado.
+- **API:** endpoint novo `DELETE /tournaments/:id`, só para o organizador, que responde 204, ou 404 se o campeonato não existir.
+
+---
+
 ## v1.5.1 — 2026-10-17
 
 Correção no rascunho de campeonato.
