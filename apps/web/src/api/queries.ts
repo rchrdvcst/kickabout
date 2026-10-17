@@ -40,7 +40,7 @@ const fixturesQuery = (id: string) => ({
   queryFn: () => apiGet<FixtureListItem[]>(`/tournaments/${id}/fixtures`),
 });
 
-export const useTournamentFixtures = (id: string) => useQuery(fixturesQuery(id));
+export const useTournamentFixtures = (id: string, enabled = true) => useQuery({ ...fixturesQuery(id), enabled });
 
 /** Confrontos de vários campeonatos, na mesma ordem dos ids (mesmo cache de `useTournamentFixtures`). */
 export const useFixturesOf = (ids: string[]) => useQueries({ queries: ids.map(fixturesQuery) });

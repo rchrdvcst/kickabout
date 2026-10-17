@@ -174,3 +174,40 @@ describe('cup admin', () => {
     expect(screen.getByRole('button', { name: 'Encerrar campeonato' })).toBeInTheDocument();
   });
 });
+
+describe('cup draft with unsaved settings', () => {
+  it('blocks the group draw and the start until the settings are saved', async () => {
+    const saved = cupTournament({
+      status: 'draft',
+      groupsPending: null,
+      options: { consolationFinal: false, grandFinalReset: false, roundRobinMode: 'simple', groupCount: 4, qualifiersPerGroup: 2 },
+    });
+    mockApi({ ...SIGNED_IN, '/tournaments/c1': saved, '/teams': [] });
+    renderRoute('/admin/campeonatos/c1');
+    const settings = await screen.findByRole('form', { name: 'Configuração' });
+    const draw = await screen.findByRole('region', { name: 'Sorteio dos grupos' });
+    expect(within(draw).getByRole('button', { name: 'Sortear grupos' })).toBeEnabled();
+
+    fireEvent.change(within(settings).getByLabelText('Número de grupos'), { target: { value: '2' } });
+    expect(within(draw).getByRole('button', { name: 'Sortear grupos' })).toBeDisabled();
+    expect(screen.getByText('Salve a configuração antes de sortear os grupos.')).toBeInTheDocument();
+
+    fireEvent.change(within(settings).getByLabelText('Número de grupos'), { target: { value: '4' } });
+    expect(within(draw).getByRole('button', { name: 'Sortear grupos' })).toBeEnabled();
+  });
+});
+
+describe('draft with unsaved settings in other formats', () => {
+  it('explains why the start waits for the settings', async () => {
+    mockApi({
+      ...SIGNED_IN,
+      '/tournaments/c1': cupTournament({ status: 'draft', format: 'single_elimination', groupsPending: undefined, knockoutDrawn: undefined, groupDraw: undefined }),
+      '/teams': [],
+    });
+    renderRoute('/admin/campeonatos/c1');
+    const settings = await screen.findByRole('form', { name: 'Configuração' });
+    fireEvent.click(within(settings).getByLabelText('Disputa de 3º lugar'));
+    expect(screen.getByText('Salve a configuração antes de iniciar.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Iniciar campeonato' })).toBeDisabled();
+  });
+});

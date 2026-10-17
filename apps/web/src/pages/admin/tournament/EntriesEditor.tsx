@@ -9,7 +9,7 @@ import { MIN_TEAMS } from '../../../lib/format';
 import { GroupDraw } from './GroupDraw';
 
 /** Times inscritos em ordem de seed; iniciar só com as inscrições salvas. */
-export function EntriesEditor({ tournament }: { tournament: Tournament }) {
+export function EntriesEditor({ tournament, settingsDirty = false }: { tournament: Tournament; settingsDirty?: boolean }) {
   const teams = useTeams();
   const saved = tournament.entries.map((entry) => entry.team.id);
   const [ids, setIds] = useState<string[]>(saved);
@@ -90,7 +90,7 @@ export function EntriesEditor({ tournament }: { tournament: Tournament }) {
           </select>
         </label>
       )}
-      {tournament.format === 'cup' && !dirty && <GroupDraw tournament={tournament} />}
+      {tournament.format === 'cup' && !dirty && <GroupDraw tournament={tournament} settingsDirty={settingsDirty} />}
       <FormError error={save.error ?? start.error} />
       <div className="actions">
         <button type="button" className="button button-secondary" disabled={!dirty || save.isPending} onClick={() => save.mutate(ids)}>
@@ -99,12 +99,13 @@ export function EntriesEditor({ tournament }: { tournament: Tournament }) {
         <ConfirmButton
           label="Iniciar campeonato"
           confirmLabel="Confirmar início: a chave não pode ser refeita"
-          disabled={dirty || ids.length < min || needsDraw || start.isPending}
+          disabled={dirty || settingsDirty || ids.length < min || needsDraw || start.isPending}
           onConfirm={() => start.mutate(undefined)}
         />
       </div>
       {dirty && <p className="muted">Salve as inscrições antes de iniciar.</p>}
       {!dirty && needsDraw && <p className="muted">Sorteie os grupos antes de iniciar.</p>}
+      {!dirty && settingsDirty && tournament.format !== 'cup' && <p className="muted">Salve a configuração antes de iniciar.</p>}
     </section>
   );
 }

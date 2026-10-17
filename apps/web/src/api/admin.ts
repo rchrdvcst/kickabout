@@ -63,6 +63,7 @@ export const updateTournament = (id: string, input: Partial<TournamentInput>) =>
 export const setEntries = (id: string, teamIds: string[]) =>
   apiRequest<Tournament>('PUT', `/tournaments/${id}/entries`, { teamIds });
 export const startTournament = (id: string) => apiRequest<Tournament>('POST', `/tournaments/${id}/start`);
+export const deleteTournament = (id: string) => apiRequest<null>('DELETE', `/tournaments/${id}`);
 export const finishTournament = (id: string) => apiRequest<Tournament>('POST', `/tournaments/${id}/finish`);
 
 export const saveResult = (id: string, matchId: number, mode: 'draft' | 'final', duels: DuelInput[]) =>
