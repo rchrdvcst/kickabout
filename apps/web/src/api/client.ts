@@ -27,11 +27,14 @@ export async function apiRequest<T>(method: string, path: string, body?: unknown
     headers: body === undefined ? undefined : { 'content-type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-  const data = parseJson(await response.text()) as { error?: { code?: string; message?: string; details?: unknown } } | null;
+  const text = await response.text();
+  const data = parseJson(text) as { error?: { code?: string; message?: string; details?: unknown } } | null;
   if (!response.ok) {
     const error = data?.error;
     throw new ApiError(response.status, error?.code ?? 'HTTP_ERROR', error?.message ?? GENERIC_MESSAGE, error?.details);
   }
+  // 200 com corpo que não é JSON (ex.: index.html servido no lugar da API).
+  if (data === null && text !== '') throw new ApiError(response.status, 'BAD_RESPONSE', GENERIC_MESSAGE);
   return data as T;
 }
 

@@ -1,5 +1,6 @@
 import type { RouteObject } from 'react-router';
 import { Layout } from './components/Layout';
+import { ErrorPage } from './pages/ErrorPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { TournamentsPage } from './pages/TournamentsPage';
@@ -15,17 +16,24 @@ export const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
+    errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'campeonatos', element: <TournamentsPage /> },
-      { path: 'campeonatos/:id', element: <TournamentPage /> },
-      { path: 'campeonatos/:id/jogos/:matchId', element: <FixturePage /> },
-      { path: 'times', element: <TeamsPage /> },
-      { path: 'times/:id', element: <TeamPage /> },
-      { path: 'times/:id/bid', element: <TeamBidPage /> },
-      { path: 'jogadores/:id', element: <PlayerPage /> },
-      { path: 'titulos', element: <TitlesPage /> },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        // Rota sem caminho: o erro de uma página aparece dentro do layout (cabeçalho continua visível).
+        errorElement: <ErrorPage />,
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: 'campeonatos', element: <TournamentsPage /> },
+          { path: 'campeonatos/:id', element: <TournamentPage /> },
+          { path: 'campeonatos/:id/jogos/:matchId', element: <FixturePage /> },
+          { path: 'times', element: <TeamsPage /> },
+          { path: 'times/:id', element: <TeamPage /> },
+          { path: 'times/:id/bid', element: <TeamBidPage /> },
+          { path: 'jogadores/:id', element: <PlayerPage /> },
+          { path: 'titulos', element: <TitlesPage /> },
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
     ],
   },
 ];

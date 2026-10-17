@@ -23,4 +23,13 @@ describe('apiGet', () => {
       message: 'Não foi possível falar com o servidor. Tente de novo em instantes.',
     });
   });
+
+  it('rejects a successful response whose body is not JSON (SPA fallback answering /api)', async () => {
+    mockApi({ '/health': new Response('<!doctype html><html></html>', { status: 200 }) });
+    await expect(apiGet('/health')).rejects.toMatchObject({
+      status: 200,
+      code: 'BAD_RESPONSE',
+      message: 'Não foi possível falar com o servidor. Tente de novo em instantes.',
+    });
+  });
 });

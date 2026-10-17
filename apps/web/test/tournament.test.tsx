@@ -116,6 +116,37 @@ describe('tournament page', () => {
     expect(within(table).getByRole('link', { name: 'Ana' })).toHaveAttribute('href', '/jogadores/p1');
   });
 
+  it('ranks players by goals, duel wins and win rate (minimum 3 duels)', async () => {
+    const row = (id: string, name: string, duels: number, wins: number, goalsFor: number) => ({
+      playerId: id,
+      player: { id, name },
+      team: LEOES,
+      duels,
+      wins,
+      draws: 0,
+      losses: duels - wins,
+      goalsFor,
+      goalsAgainst: 0,
+      goalDiff: goalsFor,
+      winRate: wins / duels,
+    });
+    mockApi({
+      '/tournaments/c1': tournament(),
+      '/tournaments/c1/stats': [row('p1', 'Ana', 3, 2, 7), row('p2', 'Bia', 5, 4, 3), row('p3', 'Caio', 1, 1, 1)],
+    });
+    renderRoute('/campeonatos/c1?aba=estatisticas');
+    const first = (name: string) => within(screen.getByRole('table', { name })).getAllByRole('row')[1];
+    expect(await screen.findByRole('table', { name: 'Artilharia' })).toBeInTheDocument();
+    expect(first('Artilharia')).toHaveTextContent('Ana');
+    expect(first('Mais vitórias em duelos')).toHaveTextContent('Bia');
+    const rate = screen.getByRole('table', { name: 'Melhor aproveitamento' });
+    expect(within(rate).getAllByRole('row').slice(1).map((r) => r.textContent)).toEqual([
+      expect.stringContaining('Bia'),
+      expect.stringContaining('Ana'),
+    ]);
+    expect(screen.getByText('Melhor aproveitamento considera jogadores com pelo menos 3 duelos.')).toBeInTheDocument();
+  });
+
   it('explains that the bracket appears once a draft starts, but lists its teams', async () => {
     mockApi({ '/tournaments/c1': tournament({ status: 'draft', startedAt: null }) });
     renderRoute('/campeonatos/c1');

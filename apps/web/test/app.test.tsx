@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { mockApi, renderRoute } from './utils';
 
 describe('layout', () => {
@@ -18,5 +18,18 @@ describe('layout', () => {
     renderRoute('/rota-que-nao-existe');
     expect(await screen.findByRole('heading', { name: 'Página não encontrada' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Voltar para o início' })).toHaveAttribute('href', '/');
+  });
+
+  it('shows a Portuguese error page inside the layout when a page crashes while rendering', async () => {
+    // Resposta com formato inesperado: a página quebra ao desestruturar a lista.
+    mockApi({ '/fixtures/recent?limit=8': { unexpected: true }, '/tournaments?status=in_progress': [] });
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    renderRoute('/');
+    expect(await screen.findByRole('heading', { name: 'Algo deu errado' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Voltar para o início' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('navigation', { name: 'Principal' })).toBeInTheDocument();
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
   });
 });
