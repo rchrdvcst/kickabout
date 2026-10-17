@@ -7,6 +7,7 @@ import type { AppDeps } from '../deps';
 import { idParams, teamRef, teamsById } from '../dto';
 import { AppError, isUniqueViolation, notFound, parse } from '../errors';
 import { toDuelInput } from '../stats/queries';
+import { bulkRegister } from './bulk';
 import { findTeamOrThrow, setPlayerTeam } from './roster';
 
 const playerBody = z.object({
@@ -17,6 +18,7 @@ const playerBody = z.object({
 const playerPatch = playerBody.pick({ name: true, phone: true }).partial();
 const teamBody = z.object({ teamId: z.string().min(1).nullable() });
 const searchQuery = z.object({ search: z.string().trim().optional() });
+const bulkBody = z.object({ players: z.array(z.unknown()).min(1).max(200) });
 
 function phoneOrThrow(raw: string): string {
   const phone = normalizePhone(raw);
@@ -55,7 +57,8 @@ export function registerPlayerRoutes(app: FastifyInstance, { prisma }: AppDeps) 
             ],
           }
         : {},
-      orderBy: { name: 'asc' },
+      // Mais recentes primeiro: quem acabou de ser cadastrado aparece no topo.
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       select: { id: true },
     });
     return Promise.all(players.map((player) => adminPlayer(prisma, player.id)));
@@ -78,6 +81,17 @@ export function registerPlayerRoutes(app: FastifyInstance, { prisma }: AppDeps) 
       if (isUniqueViolation(error)) throw phoneTaken();
       throw error;
     }
+  });
+
+  app.post('/players/bulk', { preHandler: requireAdmin }, async (request) => {
+    const parsed = bulkBody.safeParse(request.body);
+    if (!parsed.success) throw new AppError(400, 'INVALID_REQUEST', 'Envie uma lista com 1 a 200 jogadores.');
+    const { players } = parsed.data;
+    const result = await bulkRegister(prisma, players);
+    return {
+      created: await Promise.all(result.created.map(async ({ line, id }) => ({ line, player: await adminPlayer(prisma, id) }))),
+      failed: result.failed,
+    };
   });
 
   app.patch('/players/:id', { preHandler: requireAdmin }, async (request) => {

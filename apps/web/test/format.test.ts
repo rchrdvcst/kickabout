@@ -65,7 +65,8 @@ describe('format', () => {
   it('formats Brazilian phones and keeps foreign ones', () => {
     expect(formatPhone('+5511987654321')).toBe('(11) 98765-4321');
     expect(formatPhone('+551134567890')).toBe('(11) 3456-7890');
-    expect(formatPhone('+351912345678')).toBe('+351912345678');
+    expect(formatPhone('+351912345678')).toBe('+351 912 345 678');
+    expect(formatPhone('+558496773612')).toBe('(84) 9677-3612');
   });
 
   it('formats percentages and podium positions', () => {

@@ -45,6 +45,13 @@ export const createTeam = (input: TeamInput) => apiRequest<TeamSummary>('POST', 
 export const updateTeam = (id: string, input: TeamInput) => apiRequest<TeamRef>('PATCH', `/teams/${id}`, input);
 
 export const createPlayer = (input: PlayerInput) => apiRequest<AdminPlayer>('POST', '/players', input);
+
+export interface BulkResult {
+  created: { line: number; player: AdminPlayer }[];
+  failed: { line: number; name: string | null; message: string }[];
+}
+
+export const bulkCreatePlayers = (players: unknown[]) => apiRequest<BulkResult>('POST', '/players/bulk', { players });
 export const updatePlayer = (id: string, input: { name: string; phone: string }) =>
   apiRequest<AdminPlayer>('PATCH', `/players/${id}`, input);
 export const setPlayerTeam = (playerId: string, teamId: string | null) =>

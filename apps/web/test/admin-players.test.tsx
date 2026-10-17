@@ -40,7 +40,7 @@ describe('admin players', () => {
     fireEvent.change(within(form).getByLabelText('Time'), { target: { value: 't2' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Salvar' }));
     expect(await screen.findByRole('button', { name: 'Editar Ana' })).toBeInTheDocument();
-    expect(sentBodies(fetchMock, 'PATCH /players/p1')).toEqual([{ name: 'Ana Paula', phone: '(11) 98765-4321' }]);
+    expect(sentBodies(fetchMock, 'PATCH /players/p1')).toEqual([{ name: 'Ana Paula', phone: '+5511987654321' }]);
     expect(sentBodies(fetchMock, 'PUT /players/p1/team')).toEqual([{ teamId: 't2' }]);
   });
 
@@ -68,9 +68,9 @@ describe('admin players', () => {
     renderRoute('/admin/jogadores');
     const form = await screen.findByRole('form', { name: 'Novo jogador' });
     fireEvent.change(within(form).getByLabelText('Nome'), { target: { value: 'Caio' } });
-    fireEvent.change(within(form).getByLabelText('Celular com DDD'), { target: { value: '11 91234-5678' } });
+    fireEvent.change(within(form).getByLabelText('Celular'), { target: { value: '11 91234-5678' } });
     fireEvent.click(within(form).getByRole('button', { name: 'Cadastrar jogador' }));
     expect(await within(form).findByRole('alert')).toHaveTextContent('Já existe um jogador com esse celular.');
-    expect(sentBodies(fetchMock, 'POST /players')).toEqual([{ name: 'Caio', phone: '11 91234-5678', teamId: null }]);
+    expect(sentBodies(fetchMock, 'POST /players')).toEqual([{ name: 'Caio', phone: '+5511912345678', teamId: null }]);
   });
 });

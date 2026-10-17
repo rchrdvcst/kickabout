@@ -1,3 +1,4 @@
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { duelOutcome, type DuelOutcome } from '@kickabout/shared';
 import type { BracketData, DuelView, TournamentFormat, TournamentStatus } from '../api/types';
 
@@ -39,9 +40,11 @@ export function formatDate(iso: string | null): string {
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(iso));
 }
 
+/** Brasileiro no formato nacional, (11) 98765-4321; estrangeiro no internacional, +351 912 345 678. */
 export function formatPhone(e164: string): string {
   const match = /^\+55(\d{2})(\d{4,5})(\d{4})$/.exec(e164);
-  return match ? `(${match[1]}) ${match[2]}-${match[3]}` : e164;
+  if (match) return `(${match[1]}) ${match[2]}-${match[3]}`;
+  return parsePhoneNumberFromString(e164)?.formatInternational() ?? e164;
 }
 
 export const positionLabel = (position: number): string =>

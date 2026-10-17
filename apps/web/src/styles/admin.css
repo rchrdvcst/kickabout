@@ -25,7 +25,8 @@
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-width: 0;
   padding: var(--space-2) var(--space-3);
@@ -436,4 +437,50 @@ select {
     flex: 1 1 0;
     padding-inline: var(--space-2);
   }
+}
+
+/* Celular: país (bandeira + código) e número lado a lado */
+.phone-field {
+  display: grid;
+  grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.field > label > span {
+  color: var(--muted);
+  font-size: var(--step--1);
+  font-weight: 500;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--flag);
+  font-size: var(--step--1);
+}
+
+.phone-field input[aria-describedby] {
+  border-color: var(--flag);
+}
+
+/* Cadastro em massa */
+textarea {
+  resize: vertical;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.code-sample {
+  margin: 0;
+  padding: var(--space-3);
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.bulk-result .issue-list {
+  color: var(--flag);
 }
