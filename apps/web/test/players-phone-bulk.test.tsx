@@ -68,6 +68,18 @@ describe('phone field', () => {
     expect(input).toBeInvalid();
   });
 
+  it('puts the most likely countries on top and lists every other country once below', () => {
+    const { country } = renderPhone();
+    const groups = [...country.querySelectorAll('optgroup')];
+    expect(groups.map((group) => group.label)).toEqual(['Mais usados', 'Todos os países']);
+    const values = (group: Element) => [...group.querySelectorAll('option')].map((option) => option.value);
+    expect(values(groups[0]!)).toEqual(['BR', 'PT', 'AR', 'UY', 'PY', 'US']);
+    const rest = values(groups[1]!);
+    expect(rest).not.toContain('BR');
+    expect(rest).toContain('JP');
+    expect(new Set([...values(groups[0]!), ...rest]).size).toBe(values(groups[0]!).length + rest.length);
+  });
+
   it('splits a saved number back into country and national number', () => {
     const { input, country } = renderPhone('+351912345678');
     expect(country.value).toBe('PT');

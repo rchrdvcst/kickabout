@@ -18,20 +18,28 @@ export interface CountryOption {
 
 const flagOf = (code: string) => String.fromCodePoint(...[...code].map((letter) => 0x1f1e6 + letter.charCodeAt(0) - 65));
 
-let cache: CountryOption[] | null = null;
+/** Países mais prováveis entre os jogadores: ficam no topo da lista, nesta ordem. */
+export const COMMON_COUNTRIES: CountryCode[] = ['BR', 'PT', 'AR', 'UY', 'PY', 'US'];
 
-/** Países com código de discagem, nome em português; Brasil primeiro, o resto em ordem alfabética. */
-export function countryOptions(): CountryOption[] {
+let cache: { common: CountryOption[]; others: CountryOption[] } | null = null;
+
+/** Países com código de discagem e nome em português: os mais usados primeiro, os demais em ordem alfabética, sem repetir. */
+export function countryGroups(): { common: CountryOption[]; others: CountryOption[] } {
   if (cache) return cache;
   const names = new Intl.DisplayNames(['pt-BR'], { type: 'region' });
   const all = getCountries().map((code) => ({ code, dial: getCountryCallingCode(code), name: names.of(code) ?? code, flag: flagOf(code) }));
   all.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  const brazil = all.find((option) => option.code === DEFAULT_COUNTRY)!;
-  cache = [brazil, ...all.filter((option) => option !== brazil)];
+  cache = {
+    common: COMMON_COUNTRIES.map((code) => all.find((option) => option.code === code)!),
+    others: all.filter((option) => !COMMON_COUNTRIES.includes(option.code)),
+  };
   return cache;
 }
 
-export const countryName = (code: CountryCode) => countryOptions().find((option) => option.code === code)?.name ?? code;
+export function countryName(code: CountryCode): string {
+  const { common, others } = countryGroups();
+  return [...common, ...others].find((option) => option.code === code)?.name ?? code;
+}
 
 /**
  * Brasil: (DD) XXXX-XXXX até 10 dígitos e (DD) XXXXX-XXXX com 11. A biblioteca trata (84) 9677-3612

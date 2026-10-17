@@ -10,7 +10,8 @@ Cadastro de jogadores mais rápido e com suporte a estrangeiros.
 
 - **Lista de jogadores do admin:** do cadastro mais recente para o mais antigo, também na busca.
 - **Celular com país:**
-  - o campo virou uma lista de países (bandeira, nome e código, com o Brasil +55 primeiro e como padrão) mais o número, com a máscara do país enquanto se digita;
+  - o campo virou uma lista de países (bandeira, nome e código) mais o número, com a máscara do país enquanto se digita;
+  - no topo da lista ficam os mais usados (Brasil, Portugal, Argentina, Uruguai, Paraguai e Estados Unidos), com o Brasil +55 como padrão; os demais vêm abaixo em ordem alfabética, sem repetir;
   - o Brasil usa (84) 9677-3612 com 8 dígitos e (84) 99677-3612 com 9; os outros países usam a máscara da biblioteca `libphonenumber-js`;
   - colar um número com "+" e o código do país (por exemplo +351 912 345 678) troca o país sozinho;
   - número que não pode existir no país escolhido mostra "Número inválido para <país>." ao sair do campo;

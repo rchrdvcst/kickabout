@@ -1,8 +1,9 @@
 import type { CountryCode } from 'libphonenumber-js';
 import { useEffect, useId, useRef, useState } from 'react';
 import {
+  countryGroups,
   countryName,
-  countryOptions,
+  type CountryOption,
   isPossibleFor,
   maskNational,
   parseInternational,
@@ -17,6 +18,12 @@ interface Props {
   onChange: (value: string) => void;
   required?: boolean;
 }
+
+const countryOption = (option: CountryOption) => (
+  <option key={option.code} value={option.code}>
+    {option.flag} {option.name} +{option.dial}
+  </option>
+);
 
 /** País (bandeira + código) e número com a máscara do país. Entrega sempre o número internacional. */
 export function PhoneField({ label, value, onChange, required }: Props) {
@@ -57,11 +64,8 @@ export function PhoneField({ label, value, onChange, required }: Props) {
       </label>
       <div className="phone-field">
         <select aria-label="País do celular" value={country} onChange={(e) => update(e.target.value as CountryCode, national)}>
-          {countryOptions().map((option) => (
-            <option key={option.code} value={option.code}>
-              {option.flag} {option.name} +{option.dial}
-            </option>
-          ))}
+          <optgroup label="Mais usados">{countryGroups().common.map(countryOption)}</optgroup>
+          <optgroup label="Todos os países">{countryGroups().others.map(countryOption)}</optgroup>
         </select>
         <input
           ref={input}
