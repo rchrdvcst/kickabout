@@ -4,6 +4,16 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.5.1 — 2026-10-17
+
+Correção no rascunho de campeonato.
+
+- **Configuração não salva:** antes, o sorteio dos grupos e o início usavam a configuração **salva**, mesmo com mudanças ainda não salvas no formulário. Por exemplo, a tela mostrava 2 grupos com 1 classificado, mas o sorteio usava os 4 grupos salvos antes e dava erro.
+- **Agora:** enquanto a configuração tiver mudanças não salvas, "Sortear grupos" e "Iniciar campeonato" ficam desabilitados, com o aviso "Salve a configuração antes de sortear os grupos." Nos outros formatos, o aviso é "Salve a configuração antes de iniciar."
+- **A regra não mudou:** 2 grupos de 4 com 1 classificado por grupo continua valendo, e o mata-mata é direto a final.
+
+---
+
 ## v1.5 — 2026-10-17
 
 Novo formato **Copa (grupos + mata-mata)**. Spec: `docs/superpowers/specs/2026-10-17-kickabout-copa-design.md`.

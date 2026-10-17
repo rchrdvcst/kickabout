@@ -6,7 +6,7 @@ import { TeamBadge } from '../../../components/TeamBadge';
 import { groupLetter } from '../../../lib/format';
 
 /** Copa em rascunho: sorteio dos grupos com prévia, dá para sortear de novo até iniciar. */
-export function GroupDraw({ tournament }: { tournament: Tournament }) {
+export function GroupDraw({ tournament, settingsDirty = false }: { tournament: Tournament; settingsDirty?: boolean }) {
   const draw = useApiMutation(() => drawGroups(tournament.id));
   const groups = tournament.groupDraw ?? null;
 
@@ -32,12 +32,13 @@ export function GroupDraw({ tournament }: { tournament: Tournament }) {
       ) : (
         <p className="muted">Com as inscrições salvas, sorteie os times nos grupos. Dá para sortear de novo até iniciar.</p>
       )}
+      {settingsDirty && <p className="notice">Salve a configuração antes de sortear os grupos.</p>}
       <FormError error={draw.error} />
       <div className="actions">
         <button
           type="button"
           className="button button-secondary"
-          disabled={draw.isPending || tournament.entries.length === 0}
+          disabled={draw.isPending || settingsDirty || tournament.entries.length === 0}
           onClick={() => draw.mutate(undefined)}
         >
           {groups ? 'Sortear de novo' : 'Sortear grupos'}

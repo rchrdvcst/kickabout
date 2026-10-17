@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router';
 import { finishTournament, updateTournament, type TournamentInput } from '../../api/admin';
 import { useApiMutation } from '../../api/mutation';
@@ -29,8 +29,7 @@ export function AdminTournamentPage() {
           </header>
           {t.status === 'draft' ? (
             <>
-              <SettingsForm key={t.id} tournament={t} />
-              <EntriesEditor key={t.entries.map((entry) => entry.team.id).join()} tournament={t} />
+              <DraftSetup tournament={t} />
             </>
           ) : (
             <>
@@ -55,9 +54,33 @@ export function AdminTournamentPage() {
   );
 }
 
-function SettingsForm({ tournament }: { tournament: Tournament }) {
+/** Rascunho: configuração e inscrições. Sorteio e início esperam a configuração salva. */
+function DraftSetup({ tournament }: { tournament: Tournament }) {
+  const [settingsDirty, setSettingsDirty] = useState(false);
+  return (
+    <>
+      <SettingsForm key={tournament.id} tournament={tournament} onDirtyChange={setSettingsDirty} />
+      <EntriesEditor
+        key={tournament.entries.map((entry) => entry.team.id).join()}
+        tournament={tournament}
+        settingsDirty={settingsDirty}
+      />
+    </>
+  );
+}
+
+const sameSettings = (form: TournamentInput, saved: Tournament) =>
+  form.name === saved.name &&
+  form.format === saved.format &&
+  (['consolationFinal', 'grandFinalReset', 'roundRobinMode', 'groupCount', 'qualifiersPerGroup'] as const).every(
+    (key) => (form.options[key] ?? saved.options[key]) === saved.options[key],
+  );
+
+function SettingsForm({ tournament, onDirtyChange }: { tournament: Tournament; onDirtyChange: (dirty: boolean) => void }) {
   const [form, setForm] = useState<TournamentInput>({ name: tournament.name, format: tournament.format, options: tournament.options });
   const update = useApiMutation((input: TournamentInput) => updateTournament(tournament.id, input));
+  const dirty = !sameSettings(form, tournament);
+  useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
