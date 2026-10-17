@@ -136,6 +136,17 @@ describe('cup draft', () => {
     expect(start.json()).toMatchObject({ error: { code: 'GROUP_DRAW_REQUIRED', message: 'Sorteie os grupos antes de iniciar.' } });
   });
 
+  it('keeps the group draw when only the name or the 3rd place option changes', async () => {
+    const cup = await draftCup(8);
+    const groups = (await cup.post('/group-draw')).json().groups;
+    const patch = (payload: Record<string, unknown>) =>
+      app.inject({ method: 'PATCH', url: `/api/tournaments/${cup.id}`, headers: { cookie: cup.cookie }, payload });
+    expect((await patch({ name: 'Copa Nova', format: 'cup', options: { groupCount: 2, qualifiersPerGroup: 2, consolationFinal: true, roundRobinMode: 'double' } })).statusCode).toBe(200);
+    expect((await cup.get()).json().groupDraw).toEqual(groups);
+    await patch({ options: { groupCount: 4 } });
+    expect((await cup.get()).json().groupDraw).toBeNull();
+  });
+
   it('only draws groups for a cup in draft', async () => {
     const cookie = await loginAdmin(app);
     const created = await app.inject({ method: 'POST', url: '/api/tournaments', headers: { cookie }, payload: { name: 'Liga', format: 'round_robin' } });

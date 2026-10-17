@@ -65,6 +65,17 @@ export function tournamentDto(t: TournamentWithEntries) {
   };
 }
 
+/** A prévia do sorteio só vale enquanto formato, número de grupos e classificados forem os mesmos. */
+function drawStillValid(current: TournamentWithEntries, body: z.infer<typeof updateBody>): boolean {
+  const before = current.options as unknown as TournamentOptions;
+  const after = normalizeOptions({ ...before, ...body.options });
+  return (
+    (body.format === undefined || body.format === current.format) &&
+    after.groupCount === before.groupCount &&
+    after.qualifiersPerGroup === before.qualifiersPerGroup
+  );
+}
+
 const lockedError = (message: string) => new AppError(409, 'TOURNAMENT_LOCKED', message);
 
 async function cupInProgress(tx: Prisma.TransactionClient, id: string) {
@@ -128,7 +139,7 @@ export function registerTournamentRoutes(app: FastifyInstance, { prisma }: AppDe
           body.options === undefined
             ? undefined
             : (normalizeOptions({ ...(current.options as unknown as TournamentOptions), ...body.options }) as unknown as Prisma.InputJsonValue),
-        groupDraw: body.format !== undefined || body.options !== undefined ? Prisma.DbNull : undefined,
+        groupDraw: drawStillValid(current, body) ? undefined : Prisma.DbNull,
       },
     });
     return tournamentDto(await loadTournament(prisma, id));

@@ -47,7 +47,7 @@ Fora do escopo: mata-mata em eliminatória dupla, "melhores terceiros", grupos m
 - **Como:** `drawGroups(teamIds, groupCount, random)` embaralha os times e preenche os grupos na ordem do layout.
 - **Onde fica:** o resultado vai para `Tournament.groupDraw` (lista de grupos, cada um com a lista de ids de time na ordem sorteada).
 - **Sortear de novo:** substitui a prévia.
-- **O que apaga a prévia (`groupDraw = null`):** mudar a inscrição, o formato, `groupCount` ou `qualifiersPerGroup`.
+- **O que apaga a prévia (`groupDraw = null`):** mudar a inscrição, o formato, `groupCount` ou `qualifiersPerGroup`. Mudar o nome, o turno ou a disputa de 3º lugar mantém a prévia.
 - **Iniciar:**
   - exige `groupDraw` presente e coerente com a inscrição atual (mesmos times);
   - grava o `seed` de cada inscrição na ordem do sorteio (grupo A primeiro, depois B…), que é o último critério de desempate;
@@ -58,16 +58,16 @@ Fora do escopo: mata-mata em eliminatória dupla, "melhores terceiros", grupos m
 - **Confrontos:**
   - `isKnockout = false`, ou seja, 5 duelos sem desempate, e empate vale;
   - pontuação e desempate dos pontos corridos (spec v1, seção de regras), aplicados **dentro de cada grupo**.
-- **Classificados:** as `qualifiersPerGroup` primeiras posições de cada grupo, depois de todos os jogos do grupo confirmados.
+- **Classificados:** as `qualifiersPerGroup` primeiras posições de cada grupo. Na tabela, essas posições ficam marcadas desde o início, como "zona de classificação"; quem vai de fato para o mata-mata é decidido no sorteio, que só acontece com todos os jogos dos grupos confirmados.
 
 ### 2.5 Sorteio do mata-mata
 - **Condições:** campeonato em andamento, todos os confrontos da fase 1 confirmados e nenhum confronto da fase 2 com resultado (confirmado ou rascunho).
 - **Como sortear:** `drawKnockout(qualified, random)` recebe os classificados, cada um com seu grupo, e devolve a ordem de seeding da chave:
   - o tamanho é a próxima potência de 2 do total; as posições que sobram são BYE (`null`);
   - os BYEs são sorteados entre os classificados; nenhum confronto da primeira rodada pode ter os dois times do mesmo grupo;
-  - com `groupCount ≥ 2` e o mesmo número de classificados por grupo, sempre existe solução, e o algoritmo tenta de novo até encontrá-la;
+  - com `groupCount ≥ 2` e o mesmo número de classificados por grupo, sempre existe solução: os BYEs saem do grupo com mais times restantes e cada confronto junta o maior grupo com o segundo maior, sem precisar tentar de novo;
   - a primeira rodada é tudo o que a regra controla; o resto da chave sai do pareamento natural da eliminatória.
-- **Fase 2 do brackets-manager:** `single_elimination` com essa ordem em `settings.manualOrdering` (lista única; a biblioteca ignora `seedOrdering` e não rebalanceia os BYEs) e `consolationFinal` (só quando há pelo menos 4 classificados, como hoje).
+- **Fase 2 do brackets-manager:** `single_elimination` com essa ordem em `seedingIds` (os mesmos participantes da fase 1), `seedOrdering: ['natural']` e `balanceByes: false`, de modo que as posições (0,1), (2,3)… viram os jogos da 1ª rodada, e `consolationFinal` (só quando há pelo menos 4 classificados, como hoje).
 - **Sortear de novo:** apaga a fase 2 (`manager.delete.stage`) e cria outra; mesmas condições.
 - **Desfazer:** apaga a fase 2 e os rascunhos de confronto dela; mesmas condições.
 
