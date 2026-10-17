@@ -15,7 +15,7 @@ Decisões tomadas com o usuário:
 
 | Tema | Decisão |
 |---|---|
-| Montagem dos grupos | Sorteio automático. O organizador escolhe quantos grupos e pode sortear de novo antes de iniciar. |
+| Montagem dos grupos | Sorteio automático. O organizador escolhe quantos grupos (2, 4, 8, 16, 32 ou 64) e pode sortear de novo antes de iniciar. |
 | Classificados | O organizador escolhe quantos passam por grupo (1 até o tamanho do menor grupo − 1). |
 | Cruzamento | O mata-mata é sorteado. A única regra é que times do mesmo grupo não se enfrentam na primeira rodada do mata-mata. |
 | Fases | Grupos em turno único ou ida e volta. Mata-mata em eliminatória simples, com disputa de 3º opcional. |
@@ -29,15 +29,16 @@ Fora do escopo: mata-mata em eliminatória dupla, "melhores terceiros", grupos m
 ### 2.1 Criação (rascunho)
 - **Formato:** `cup`, exibido como "Copa (grupos + mata-mata)".
 - **Opções:**
-  - `groupCount`: inteiro, no mínimo 2 e no máximo 16;
+  - `groupCount`: 2, 4, 8, 16, 32 ou 64 (sempre uma potência de 2);
   - `qualifiersPerGroup`: inteiro, no mínimo 1;
   - `roundRobinMode`: `simple` (turno único) ou `double` (ida e volta), padrão `simple`;
   - `consolationFinal`: booleano, padrão `false`.
 - **Inscrição:** a mesma dos outros formatos.
 
 ### 2.2 Tamanho dos grupos e limites
-- `cupLayout(teamCount, groupCount)` distribui os times o mais parelho possível. Os tamanhos diferem em no máximo 1, e os primeiros grupos ficam com os maiores (10 times em 3 grupos dá 4, 3 e 3).
-- **Grupo pequeno demais:** cada grupo precisa de pelo menos 2 times, ou seja, `teamCount ≥ 2 × groupCount`. Mensagem: "Com N times, dá para ter no máximo X grupos."
+- `cupLayout(teamCount, groupCount)` distribui os times o mais parelho possível. Os tamanhos diferem em no máximo 1, e os primeiros grupos ficam com os maiores (10 times em 4 grupos dá 3, 3, 2 e 2).
+- **Número de grupos fora da lista:** "O número de grupos precisa ser 2, 4, 8, 16, 32 ou 64."
+- **Grupo pequeno demais:** cada grupo precisa de pelo menos 2 times, ou seja, `teamCount ≥ 2 × groupCount`. Mensagem: "Com N times, dá para ter no máximo X grupos.", onde X é o maior valor da lista que cabe.
 - **Classificados demais:** precisa valer `qualifiersPerGroup ≤ tamanho do menor grupo − 1`. Mensagem: "Com N times em G grupos, passam no máximo Q por grupo."
 - **Quando se valida:** no sorteio dos grupos e ao iniciar. No rascunho, salvar opções fora dos limites é permitido, porque a inscrição ainda pode mudar; o resumo na tela já avisa.
 
@@ -90,6 +91,7 @@ Fora do escopo: mata-mata em eliminatória dupla, "melhores terceiros", grupos m
 - **Migração:** uma, com o valor novo no enum e a coluna nova.
 
 ### 3.2 Regras puras (`packages/shared`)
+- `GROUP_COUNTS = [2, 4, 8, 16, 32, 64]`
 - `cupLayout(teamCount, groupCount): { sizes: number[]; maxQualifiers: number } | { error: string }`
 - `drawGroups<T>(items: T[], groupCount: number, random: () => number): T[][]`
 - `drawKnockout<T>(qualified: { item: T; group: number }[], random: () => number): (T | null)[]`
@@ -150,7 +152,7 @@ Todas recebem `random` (como `Math.random`) para os testes usarem uma sequência
 - **shared:**
   - `cupLayout`: tamanhos e limites;
   - `drawGroups`: parelho, sem perder nem repetir times;
-  - `drawKnockout`: nenhum par do mesmo grupo na primeira rodada, com centenas de sementes e combinações de 2 a 8 grupos e 1 a 4 classificados, com e sem BYE; todos os classificados aparecem uma vez; quantidade certa de BYEs.
+  - `drawKnockout`: nenhum par do mesmo grupo na primeira rodada, com centenas de sementes e combinações de 2, 4, 8 e 16 grupos e 1 a 4 classificados, com e sem BYE; todos os classificados aparecem uma vez; quantidade certa de BYEs.
 - **API (integração):**
   - fluxo completo: criar, sortear grupos, sortear de novo, iniciar, jogar os grupos, sortear o mata-mata, sortear de novo, desfazer, sortear, jogar, encerrar e conferir os títulos;
   - erros: limites, iniciar sem sorteio, sorteio desatualizado depois de mudar a inscrição, `GROUPS_PENDING`, `KNOCKOUT_STARTED`, `GROUPS_LOCKED`;

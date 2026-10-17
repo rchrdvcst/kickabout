@@ -27,13 +27,13 @@
 - **Regras de confronto:** inalteradas. Nos grupos, 5 duelos e empate vale (`isKnockout = false`). No mata-mata, 6º duelo e pênaltis se empatar (`isKnockout = true`).
 - **Desempate nos grupos:** pontos, confronto direto, vitórias, saldo de gols, gols marcados e, por último, a ordem do sorteio (seed). É o `computeStandings` atual.
 - **Limites:**
-  - `groupCount` de 2 a 16;
+  - `groupCount` só pode ser 2, 4, 8, 16, 32 ou 64 (`GROUP_COUNTS`); no formulário é uma lista de opções;
   - `qualifiersPerGroup` de 1 até (tamanho do menor grupo − 1);
   - cada grupo com pelo menos 2 times.
 - **Mensagens de erro (exatas):**
-  - "A copa precisa de pelo menos 2 grupos."
+  - "O número de grupos precisa ser 2, 4, 8, 16, 32 ou 64."
   - "A copa precisa de pelo menos 4 times; há N."
-  - "Com N times, dá para ter no máximo X grupos."
+  - "Com N times, dá para ter no máximo X grupos." (X = maior valor de `GROUP_COUNTS` com pelo menos 2 times por grupo)
   - "Com N times em G grupos, passam no máximo Q por grupo."
   - "Sorteie os grupos antes de iniciar."
   - "Faltam N jogos dos grupos." (singular: "Falta 1 jogo dos grupos.")
@@ -48,7 +48,7 @@
 
 ## Review Focus
 
-1. **Grupos desiguais** (10 times em 3 grupos dá 4, 3 e 3): classificação e classificados por grupo continuam certos, e o mata-mata de 6 sai com 2 BYEs. Teste na Task 4 ("uneven groups").
+1. **Grupos desiguais** (9 times em 2 grupos dá 5 e 4, com 3 classificados por grupo): classificação e classificados por grupo continuam certos, e o mata-mata de 6 sai com 2 BYEs. Teste na Task 4 ("uneven groups").
 2. **Resultado do mata-mata reaberto para rascunho:** continua contando como "mata-mata começou", e sortear de novo ou desfazer é recusado. Teste na Task 4 ("even a reopened draft").
 3. **Ida e volta nos grupos:** gera o dobro de confrontos. Teste na Task 3 ("double round robin").
 4. **Inscrição ou opções mudadas depois do sorteio dos grupos:** a prévia some e iniciar é recusado. Teste na Task 2 ("forgets the draw").
@@ -93,6 +93,7 @@
 **Interfaces:**
 - Consumes: nada.
 - Produces:
+  - `GROUP_COUNTS: readonly number[]` = `[2, 4, 8, 16, 32, 64]`
   - `cupLayout(teamCount: number, groupCount: number): { ok: true; sizes: number[]; maxQualifiers: number } | { ok: false; message: string }`
   - `cupProblem(teamCount: number, groupCount: number, qualifiersPerGroup: number): string | null`
   - `drawGroups<T>(items: readonly T[], groupCount: number, random: () => number): T[][]`
@@ -119,35 +120,40 @@ function seeded(seed: number): () => number {
 
 describe('cupLayout', () => {
   it.each([
-    [10, 3, [4, 3, 3], 2],
+    [10, 4, [3, 3, 2, 2], 1],
+    [9, 2, [5, 4], 3],
     [7, 2, [4, 3], 2],
     [8, 2, [4, 4], 3],
     [4, 2, [2, 2], 1],
+    [128, 64, Array(64).fill(2), 1],
   ])('%i times em %i grupos → %j, até %i por grupo', (teams, groups, sizes, max) => {
     expect(cupLayout(teams, groups)).toEqual({ ok: true, sizes, maxQualifiers: max });
   });
 
   it('explains layouts that cannot work', () => {
-    expect(cupLayout(8, 1)).toEqual({ ok: false, message: 'A copa precisa de pelo menos 2 grupos.' });
+    for (const groups of [1, 3, 6, 128]) {
+      expect(cupLayout(200, groups)).toEqual({ ok: false, message: 'O número de grupos precisa ser 2, 4, 8, 16, 32 ou 64.' });
+    }
     expect(cupLayout(3, 2)).toEqual({ ok: false, message: 'A copa precisa de pelo menos 4 times; há 3.' });
-    expect(cupLayout(5, 3)).toEqual({ ok: false, message: 'Com 5 times, dá para ter no máximo 2 grupos.' });
+    expect(cupLayout(6, 4)).toEqual({ ok: false, message: 'Com 6 times, dá para ter no máximo 2 grupos.' });
+    expect(cupLayout(20, 16)).toEqual({ ok: false, message: 'Com 20 times, dá para ter no máximo 8 grupos.' });
   });
 });
 
 describe('cupProblem', () => {
   it('accepts up to the smallest group minus one and explains the limit', () => {
-    expect(cupProblem(10, 3, 2)).toBeNull();
-    expect(cupProblem(10, 3, 3)).toBe('Com 10 times em 3 grupos, passam no máximo 2 por grupo.');
-    expect(cupProblem(10, 3, 0)).toBe('Pelo menos 1 time por grupo precisa se classificar.');
-    expect(cupProblem(5, 3, 1)).toBe('Com 5 times, dá para ter no máximo 2 grupos.');
+    expect(cupProblem(9, 2, 3)).toBeNull();
+    expect(cupProblem(10, 4, 2)).toBe('Com 10 times em 4 grupos, passam no máximo 1 por grupo.');
+    expect(cupProblem(10, 4, 0)).toBe('Pelo menos 1 time por grupo precisa se classificar.');
+    expect(cupProblem(6, 4, 1)).toBe('Com 6 times, dá para ter no máximo 2 grupos.');
   });
 });
 
 describe('drawGroups', () => {
   it('splits every item once into groups as even as possible', () => {
     const items = Array.from({ length: 10 }, (_, i) => `t${i}`);
-    const groups = drawGroups(items, 3, seeded(1));
-    expect(groups.map((group) => group.length)).toEqual([4, 3, 3]);
+    const groups = drawGroups(items, 4, seeded(1));
+    expect(groups.map((group) => group.length)).toEqual([3, 3, 2, 2]);
     expect(groups.flat().sort()).toEqual([...items].sort());
   });
 
@@ -163,7 +169,7 @@ describe('drawKnockout', () => {
     Array.from({ length: groups * perGroup }, (_, i) => ({ item: `g${i % groups}-${Math.floor(i / groups)}`, group: i % groups }));
 
   it('never pairs two teams of the same group in the first round, places byes, and uses every team once', () => {
-    for (let groups = 2; groups <= 8; groups++) {
+    for (const groups of [2, 4, 8, 16]) {
       for (let perGroup = 1; perGroup <= 4; perGroup++) {
         const qualified = build(groups, perGroup);
         let size = 1;
@@ -200,14 +206,19 @@ Expected: FAIL com "Failed to resolve import "./cup"".
 - [ ] **Step 3: Write minimal implementation** (`packages/shared/src/cup.ts`)
 
 ```ts
+/** Números de grupos aceitos na copa: potências de 2. */
+export const GROUP_COUNTS: readonly number[] = [2, 4, 8, 16, 32, 64];
+
 export type CupLayout = { ok: true; sizes: number[]; maxQualifiers: number } | { ok: false; message: string };
 
 /** Tamanhos dos grupos (o mais parelho possível, maiores primeiro) e o máximo de classificados por grupo. */
 export function cupLayout(teamCount: number, groupCount: number): CupLayout {
-  if (!Number.isInteger(groupCount) || groupCount < 2) return { ok: false, message: 'A copa precisa de pelo menos 2 grupos.' };
+  if (!GROUP_COUNTS.includes(groupCount)) return { ok: false, message: 'O número de grupos precisa ser 2, 4, 8, 16, 32 ou 64.' };
   if (teamCount < 4) return { ok: false, message: `A copa precisa de pelo menos 4 times; há ${teamCount}.` };
-  const maxGroups = Math.floor(teamCount / 2);
-  if (groupCount > maxGroups) return { ok: false, message: `Com ${teamCount} times, dá para ter no máximo ${maxGroups} grupos.` };
+  if (groupCount * 2 > teamCount) {
+    const maxGroups = Math.max(...GROUP_COUNTS.filter((count) => count * 2 <= teamCount));
+    return { ok: false, message: `Com ${teamCount} times, dá para ter no máximo ${maxGroups} grupos.` };
+  }
   const base = Math.floor(teamCount / groupCount);
   const extra = teamCount % groupCount;
   const sizes = Array.from({ length: groupCount }, (_, index) => base + (index < extra ? 1 : 0));
@@ -419,10 +430,10 @@ async function playPhase(cup: Cup, phase: 'groups' | 'knockout') {
 
 describe('cup draft', () => {
   it('creates a cup with group options and explains layouts that cannot work', async () => {
-    const cup = await draftCup(5, { groupCount: 3, qualifiersPerGroup: 1 });
+    const cup = await draftCup(5, { groupCount: 4, qualifiersPerGroup: 1 });
     expect((await cup.get()).json()).toMatchObject({
       format: 'cup',
-      options: { groupCount: 3, qualifiersPerGroup: 1, roundRobinMode: 'simple', consolationFinal: false },
+      options: { groupCount: 4, qualifiersPerGroup: 1, roundRobinMode: 'simple', consolationFinal: false },
       groupDraw: null,
       knockoutDrawn: false,
       groupsPending: null,
@@ -430,6 +441,15 @@ describe('cup draft', () => {
     const draw = await cup.post('/group-draw');
     expect(draw.statusCode).toBe(409);
     expect(draw.json()).toMatchObject({ error: { code: 'CUP_LAYOUT_INVALID', message: 'Com 5 times, dá para ter no máximo 2 grupos.' } });
+
+    const odd = await app.inject({
+      method: 'PATCH',
+      url: `/api/tournaments/${cup.id}`,
+      headers: { cookie: cup.cookie },
+      payload: { options: { groupCount: 3 } },
+    });
+    expect(odd.statusCode).toBe(400);
+    expect(JSON.stringify(odd.json())).toContain('O número de grupos precisa ser 2, 4, 8, 16, 32 ou 64.');
   });
 
   it('draws the groups, draws again, and forgets the draw when the entries or options change', async () => {
@@ -527,14 +547,19 @@ Depois rode em `apps/api`: `npx prisma generate` e `npx prisma migrate deploy` (
 `apps/api/src/tournaments/options.ts` (arquivo inteiro):
 
 ```ts
+import { GROUP_COUNTS } from '@kickabout/shared';
 import { z } from 'zod';
 
 export const optionsSchema = z.object({
   consolationFinal: z.boolean().optional(),
   grandFinalReset: z.boolean().optional(),
   roundRobinMode: z.enum(['simple', 'double']).optional(),
-  groupCount: z.number().int().min(2).max(16).optional(),
-  qualifiersPerGroup: z.number().int().min(1).max(16).optional(),
+  groupCount: z
+    .number()
+    .int()
+    .refine((count) => GROUP_COUNTS.includes(count), 'O número de grupos precisa ser 2, 4, 8, 16, 32 ou 64.')
+    .optional(),
+  qualifiersPerGroup: z.number().int().min(1).max(63).optional(),
 });
 
 export interface TournamentOptions {
@@ -997,12 +1022,12 @@ describe('cup knockout', () => {
   });
 
   it('ranks uneven groups and fills the knockout with byes', async () => {
-    const cup = await startedCup(10, { groupCount: 3, qualifiersPerGroup: 2 });
+    const cup = await startedCup(9, { groupCount: 2, qualifiersPerGroup: 3 });
     const sizes = (await cup.get('/standings')).json().reduce((acc: Record<number, number>, row: { groupNumber: number }) => {
       acc[row.groupNumber] = (acc[row.groupNumber] ?? 0) + 1;
       return acc;
     }, {});
-    expect(sizes).toEqual({ 1: 4, 2: 3, 3: 3 });
+    expect(sizes).toEqual({ 1: 5, 2: 4 });
     await playPhase(cup, 'groups');
     expect((await cup.post('/knockout-draw')).statusCode).toBe(200);
     const standings = (await cup.get('/standings')).json() as { groupNumber: number; qualified: boolean; team: { id: string } }[];
@@ -1604,9 +1629,10 @@ Expected: PASS em todos. Se outro `Record<TournamentFormat, …>` do site reclam
 ```tsx
 describe('cupSummary', () => {
   it('describes the layout or the problem', () => {
-    expect(cupSummary(10, 3, 2)).toBe('10 times: grupos de 4, 3 e 3; passam 6; mata-mata de 8 com 2 BYEs.');
+    expect(cupSummary(9, 2, 3)).toBe('9 times: grupos de 5 e 4; passam 6; mata-mata de 8 com 2 BYEs.');
+    expect(cupSummary(10, 4, 1)).toBe('10 times: grupos de 3, 3, 2 e 2; passam 4; mata-mata de 4.');
     expect(cupSummary(8, 2, 2)).toBe('8 times: 2 grupos de 4; passam 4; mata-mata de 4.');
-    expect(cupSummary(10, 3, 3)).toBe('Com 10 times em 3 grupos, passam no máximo 2 por grupo.');
+    expect(cupSummary(9, 2, 4)).toBe('Com 9 times em 2 grupos, passam no máximo 3 por grupo.');
   });
 });
 
@@ -1737,7 +1763,7 @@ export function cupSummary(teamCount: number, groupCount: number, qualifiers: nu
 `apps/web/src/pages/admin/tournament/TournamentFields.tsx`:
 - Em `FORMATS`, acrescente `'cup'`.
 - A assinatura passa a ser `export function TournamentFields({ value, onChange, teamCount }: { value: TournamentInput; onChange: (value: TournamentInput) => void; teamCount?: number })`.
-- Importe `cupSummary`.
+- Importe `cupSummary` e `GROUP_COUNTS` (de `@kickabout/shared`).
 - O bloco do 3º lugar passa a valer também para a copa: `{(value.format === 'single_elimination' || value.format === 'cup') && (…)}`.
 - O bloco de turnos passa a valer também para a copa, com rótulo próprio: `{(value.format === 'round_robin' || value.format === 'cup') && (<label className="field"><span>{value.format === 'cup' ? 'Fase de grupos' : 'Turnos'}</span> …` (o resto igual).
 - Depois do bloco de turnos, acrescente:
@@ -1747,21 +1773,20 @@ export function cupSummary(teamCount: number, groupCount: number, qualifiers: nu
         <>
           <label className="field">
             <span>Número de grupos</span>
-            <input
-              type="number"
-              min={2}
-              max={16}
-              required
-              value={value.options.groupCount ?? 2}
-              onChange={(e) => setOption({ groupCount: Number(e.target.value) })}
-            />
+            <select value={value.options.groupCount ?? 2} onChange={(e) => setOption({ groupCount: Number(e.target.value) })}>
+              {GROUP_COUNTS.map((count) => (
+                <option key={count} value={count}>
+                  {count} grupos
+                </option>
+              ))}
+            </select>
           </label>
           <label className="field">
             <span>Classificados por grupo</span>
             <input
               type="number"
               min={1}
-              max={16}
+              max={63}
               required
               value={value.options.qualifiersPerGroup ?? 2}
               onChange={(e) => setOption({ qualifiersPerGroup: Number(e.target.value) })}
@@ -1959,7 +1984,7 @@ Expected: PASS em todos; typecheck limpo.
 
 Novo formato **Copa (grupos + mata-mata)**. Spec: `docs/superpowers/specs/2026-10-17-kickabout-copa-design.md`.
 
-- **Criação:** o organizador escolhe o número de grupos, quantos passam por grupo, o turno da fase de grupos (único ou ida e volta) e se há disputa de 3º lugar. Um resumo mostra os tamanhos dos grupos e o tamanho do mata-mata (com BYEs).
+- **Criação:** o organizador escolhe o número de grupos (2, 4, 8, 16, 32 ou 64), quantos passam por grupo, o turno da fase de grupos (único ou ida e volta) e se há disputa de 3º lugar. Um resumo mostra os tamanhos dos grupos e o tamanho do mata-mata (com BYEs).
 - **Sorteio dos grupos:** feito no rascunho, com prévia e "Sortear de novo". Mudar inscrições ou opções apaga a prévia, e o campeonato só inicia com um sorteio feito.
 - **Fase de grupos:** pontos corridos dentro de cada grupo, com as regras de sempre (empate vale, mesmo desempate). No site, a aba **Grupos** mostra uma tabela por grupo, com os classificados marcados.
 - **Sorteio do mata-mata:** com os grupos encerrados, o organizador sorteia a chave. Times do mesmo grupo não se enfrentam na primeira rodada, e os BYEs também são sorteados. Dá para sortear de novo ou desfazer enquanto nenhum jogo do mata-mata tiver resultado. Depois do sorteio, os jogos dos grupos ficam travados para correção.
