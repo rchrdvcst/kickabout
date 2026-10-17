@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { DuelStrip } from '../src/components/DuelStrip';
 import { MatchRow } from '../src/components/MatchRow';
+import { Scoreboard } from '../src/components/Scoreboard';
 import { TeamBadge } from '../src/components/TeamBadge';
 import { LEOES, TIGRES, team } from './data';
 
@@ -64,5 +65,21 @@ describe('MatchRow', () => {
       </MemoryRouter>,
     );
     expect(screen.getByRole('link')).toHaveTextContent('A jogar');
+  });
+});
+
+describe('Scoreboard', () => {
+  it('highlights only the winning score', () => {
+    const { container } = render(<Scoreboard teamA={LEOES} teamB={TIGRES} scoreA={2} scoreB={3} />);
+    const winners = container.querySelectorAll('.scoreboard-winner');
+    expect([...winners].map((el) => el.textContent)).toEqual(['3']);
+    expect(container.querySelector('.scoreboard-score')).toHaveTextContent('2× a 3');
+  });
+
+  it('highlights nothing on a draw or before the result', () => {
+    const draw = render(<Scoreboard teamA={LEOES} teamB={TIGRES} scoreA={2} scoreB={2} />);
+    expect(draw.container.querySelector('.scoreboard-winner')).toBeNull();
+    const pending = render(<Scoreboard teamA={LEOES} teamB={TIGRES} scoreA={null} scoreB={null} />);
+    expect(pending.container.querySelector('.scoreboard-winner')).toBeNull();
   });
 });

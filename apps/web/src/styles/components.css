@@ -10,10 +10,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-3) 16px;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  padding: var(--space-2) 16px;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--grass) 25%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .wordmark {
@@ -28,24 +29,41 @@
 .wordmark img {
   display: block;
   width: auto;
-  height: 2.5rem;
+  height: 3.25rem;
 }
 
 .mainnav {
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-5);
   margin-left: auto;
 }
 
 .mainnav a {
+  position: relative;
+  padding: var(--space-2) 0;
   color: var(--muted);
   text-decoration: none;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: var(--step-1);
 }
 
-.mainnav a[aria-current='page'],
 .mainnav a:hover {
   color: var(--chalk);
+}
+
+.mainnav a[aria-current='page'] {
+  color: var(--grass);
+}
+
+.mainnav a[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: var(--grass);
+  transform: skewX(var(--slant));
 }
 
 /* Celulares estreitos (320px): marca + 3 links cabem sem rolagem horizontal */
@@ -55,8 +73,22 @@
     gap: var(--space-3);
   }
 
+  .mainnav a {
+    font-size: var(--step-0);
+  }
+
+  .wordmark img {
+    height: 2.5rem;
+  }
+}
+
+@media (min-width: 360px) and (max-width: 479px) {
   .mainnav {
-    font-size: var(--step--1);
+    gap: var(--space-4);
+  }
+
+  .mainnav a {
+    font-size: 1.0625rem;
   }
 }
 
@@ -108,9 +140,14 @@
   font-weight: 500;
 }
 
+.tabs a:hover {
+  color: var(--chalk);
+}
+
 .tabs a[aria-current='page'] {
   background: var(--grass);
   color: var(--grass-ink);
+  font-weight: 700;
 }
 
 /* Escudo */
@@ -120,7 +157,7 @@
   place-items: center;
   width: 2rem;
   height: 2.25rem;
-  background: var(--surface-2);
+  background: linear-gradient(160deg, #34446a, var(--line));
   clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
   font-family: var(--font-display);
   font-weight: 700;
@@ -136,9 +173,10 @@
 }
 
 .badge-lg {
-  width: 3.5rem;
-  height: 4rem;
+  width: 4rem;
+  height: 4.5rem;
   font-size: var(--step-1);
+  filter: drop-shadow(0 0.5rem 1rem rgb(0 0 0 / 0.45));
 }
 
 /* Listas e linhas de confronto */
@@ -161,7 +199,8 @@
 .row-title {
   font-weight: 600;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .row-meta {
@@ -194,7 +233,9 @@
   font-family: var(--font-display);
   font-weight: 600;
   font-size: var(--step-1);
-  overflow-wrap: anywhere;
+  line-height: 1.15;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .match-team-b {
@@ -202,12 +243,33 @@
   text-align: right;
 }
 
+/* Placar em "caixinha" de transmissão */
 .match-score {
+  padding: 0.1rem var(--space-3);
+  border-radius: var(--radius-sm);
+  background: #000;
+  box-shadow: inset 0 0 0 1px var(--line);
   font-family: var(--font-display);
-  font-weight: 700;
+  font-style: italic;
+  font-weight: 800;
   font-size: var(--step-2);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.match-row:hover .match-score {
+  box-shadow: inset 0 0 0 1px var(--grass);
+}
+
+@media (max-width: 479px) {
+  .match-team {
+    font-size: var(--step-0);
+  }
+
+  .match-score {
+    padding: 0 var(--space-2);
+    font-size: var(--step-1);
+  }
 }
 
 .match-score .sep {
@@ -243,15 +305,52 @@
 }
 
 /* Placar grande (elemento marcante) */
+/* Placar de transmissão: campo à noite com linha do meio e círculo central, refletor por cima */
 .scoreboard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4);
-  background: radial-gradient(120% 140% at 50% 0%, var(--surface-2), var(--surface));
+  padding: var(--space-6) var(--space-4);
+  background:
+    radial-gradient(70% 90% at 50% -20%, var(--floodlight), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 3rem, rgb(255 255 255 / 0.018) 3rem 6rem),
+    linear-gradient(180deg, var(--surface-2), var(--surface));
   border: 1px solid var(--line);
+  border-top: 3px solid var(--grass);
   border-radius: var(--radius);
+}
+
+.scoreboard::before,
+.scoreboard::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.scoreboard::before {
+  inset: 0 auto 0 50%;
+  width: 2px;
+  background: rgb(255 255 255 / 0.07);
+}
+
+.scoreboard::after {
+  top: 50%;
+  left: 50%;
+  width: 11rem;
+  aspect-ratio: 1;
+  border: 2px solid rgb(255 255 255 / 0.07);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hero-link:hover .scoreboard {
+  border-color: color-mix(in srgb, var(--grass) 50%, var(--line));
+  border-top-color: var(--grass);
 }
 
 .scoreboard-team {
@@ -265,7 +364,7 @@
 .scoreboard-name {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--step-1);
+  font-size: var(--step-2);
   line-height: 1.1;
   overflow-wrap: break-word;
   hyphens: auto;
@@ -273,11 +372,31 @@
 
 .scoreboard-score {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-style: italic;
+  font-weight: 800;
   font-size: var(--step-4);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.scoreboard-winner {
+  color: var(--grass);
+  text-shadow: 0 0 1.5rem color-mix(in srgb, var(--grass) 45%, transparent);
+}
+
+@media (max-width: 479px) {
+  .scoreboard-score {
+    font-size: var(--step-3);
+  }
+
+  .scoreboard::after {
+    width: 7rem;
+  }
+
+  .scoreboard-name {
+    font-size: var(--step-1);
+  }
 }
 
 .scoreboard-sep {
@@ -293,6 +412,11 @@
 
 .hero-context {
   color: var(--muted);
+  font-weight: 600;
+}
+
+.hero-context a {
+  text-decoration: none;
 }
 
 .hero-link {
@@ -447,6 +571,7 @@ td.name a {
 .stat {
   padding: var(--space-3) var(--space-4);
   background: var(--surface);
+  border-left: 3px solid var(--grass);
   border-radius: var(--radius-sm);
 }
 
@@ -507,12 +632,20 @@ td.name a {
 
 .button-link {
   display: inline-block;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-sm);
   background: var(--grass);
   color: var(--grass-ink);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: var(--step-1);
   text-decoration: none;
+}
+
+.button-link:hover {
+  color: var(--grass-ink);
+  background: color-mix(in srgb, var(--grass) 85%, #fff);
 }
 
 /* Chave (brackets-viewer) */

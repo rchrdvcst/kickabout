@@ -10,7 +10,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* Refletor no alto da página, sobre o azul-noite */
+  background:
+    radial-gradient(90rem 32rem at 50% -12rem, color-mix(in srgb, var(--grass) 9%, transparent), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--chalk);
   font-family: var(--font-body);
   font-size: var(--step-0);
@@ -32,11 +36,20 @@ h3 {
 
 h1 {
   font-size: var(--step-3);
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
 h2 {
   font-size: var(--step-2);
+  font-style: italic;
   margin-top: var(--space-6);
+}
+
+a:hover {
+  color: var(--grass);
 }
 
 h3 {

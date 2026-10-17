@@ -4,6 +4,20 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.1 — 2026-10-17
+
+Novo visual do site, em modo escuro com a identidade da logo. Nenhuma regra ou funcionalidade mudou.
+
+- **Cores:** fundo azul-noite de estádio, com uma luz de refletor no topo da página. O destaque passou a ser o verde-limão da logo (`#8CF014`). Âmbar e vermelho ficam só para status (rascunho, derrota, desempate).
+- **Fontes:** Barlow e Barlow Condensed agora são carregadas de fato. Antes o site caía na fonte padrão do sistema. Títulos de página e placares usam o itálico pesado, como o "KICKABOUT" da logo.
+- **Placar de destaque da página inicial e dos confrontos:** desenhado como um campo à noite, com linha do meio-campo, círculo central e faixa verde no topo. O placar do vencedor aparece em verde.
+- **Listas de resultados:** cada placar fica numa caixinha escura que acende em verde ao passar o mouse.
+- **Topo:** logo maior, menu em itálico e o link da página atual em verde, com sublinhado inclinado.
+- **Botões, abas e números:** botões em verde-limão; a aba ativa em verde; os números de estatística ganharam um filete verde à esquerda.
+- **Celular:** nomes longos de times quebram com hífen, em vez de no meio da palavra sem hífen. Placares e nomes das listas ficaram mais compactos. Continua sem rolagem horizontal a partir de 320px.
+
+---
+
 ## v1.0 — 2026-10-17
 
 Primeira versão: plataforma de campeonatos de eFootball mobile entre times. Um organizador (admin) cadastra tudo; o público acompanha sem login.

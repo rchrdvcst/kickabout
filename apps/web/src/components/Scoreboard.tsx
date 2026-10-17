@@ -20,12 +20,12 @@ export function Scoreboard({ teamA, teamB, scoreA, scoreB }: Props) {
           <span className="muted">vs</span>
         ) : (
           <>
-            {scoreA}
+            <span className={scoreA > scoreB ? 'scoreboard-winner' : undefined}>{scoreA}</span>
             <span className="scoreboard-sep" aria-hidden="true">
               ×
             </span>
             <span className="visually-hidden"> a </span>
-            {scoreB}
+            <span className={scoreB > scoreA ? 'scoreboard-winner' : undefined}>{scoreB}</span>
           </>
         )}
       </div>

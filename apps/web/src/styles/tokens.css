@@ -1,16 +1,19 @@
 :root {
   color-scheme: dark;
 
-  --bg: #0d1813;
-  --surface: #13231b;
-  --surface-2: #1a2e23;
-  --line: #26402f;
-  --chalk: #eef4ee;
-  --muted: #94ab9b;
-  --grass: #3ddc84;
-  --grass-ink: #06210f;
-  --amber: #f5b942;
-  --flag: #ff6b5e;
+  /* Noite de estádio: azul-noite de transmissão + verde-limão da logo */
+  --bg: #0a0f1c;
+  --surface: #111a2c;
+  --surface-2: #19243a;
+  --line: #26334d;
+  --chalk: #f1f5f9;
+  --muted: #93a0b8;
+  --grass: #8cf014;
+  --grass-deep: #00c030;
+  --grass-ink: #0b1a00;
+  --amber: #ffc23d;
+  --flag: #ff5c5c;
+  --floodlight: color-mix(in srgb, var(--grass) 16%, transparent);
 
   --font-body: 'Barlow', system-ui, sans-serif;
   --font-display: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
@@ -19,8 +22,8 @@
   --step-0: 1rem;
   --step-1: 1.25rem;
   --step-2: 1.625rem;
-  --step-3: 2.25rem;
-  --step-4: 3.5rem;
+  --step-3: 2.5rem;
+  --step-4: 4rem;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -30,5 +33,7 @@
   --space-6: 2.5rem;
 
   --radius-sm: 6px;
-  --radius: 10px;
+  --radius: 12px;
+  /* Inclinação da logo, usada em botões e placares */
+  --slant: -8deg;
 }
