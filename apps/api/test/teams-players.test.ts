@@ -25,6 +25,17 @@ describe('teams', () => {
     expect(dup.json()).toMatchObject({ error: { code: 'TEAM_NAME_TAKEN' } });
   });
 
+  it('accepts a tag of at most 3 characters, on create and on update', async () => {
+    const cookie = await loginAdmin(app);
+    const long = await app.inject({ method: 'POST', url: '/api/teams', headers: { cookie }, payload: { name: 'Leões', shortName: 'LEOS' } });
+    expect(long.statusCode).toBe(400);
+    expect(long.json()).toMatchObject({ error: { code: 'INVALID_REQUEST' } });
+
+    const team = await createTeam(app, cookie, 'Leões');
+    const edit = await app.inject({ method: 'PATCH', url: `/api/teams/${team.id}`, headers: { cookie }, payload: { shortName: 'LEOS' } });
+    expect(edit.statusCode).toBe(400);
+  });
+
   it('accepts only http(s) crest urls', async () => {
     const cookie = await loginAdmin(app);
     const res = await app.inject({

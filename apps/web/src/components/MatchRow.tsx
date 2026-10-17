@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import type { FixtureStatus, TeamRef } from '../api/types';
 import { StatusChip } from './StatusChip';
 import { TeamBadge } from './TeamBadge';
+import { TeamName } from './TeamName';
 
 interface Props {
   to: string;
@@ -18,8 +19,8 @@ export function MatchRow({ to, teamA, teamB, scoreA, scoreB, status, caption }: 
     <Link to={to} className="match-row">
       {caption && <span className="match-caption">{caption}</span>}
       <span className="match-team">
-        <TeamBadge team={teamA} />
-        {teamA.name}
+        <TeamBadge team={teamA} mark="initial" />
+        <TeamName team={teamA} />
       </span>
       {status === 'completed' && scoreA !== null && scoreB !== null ? (
         <span className="match-score">
@@ -36,8 +37,8 @@ export function MatchRow({ to, teamA, teamB, scoreA, scoreB, status, caption }: 
         </span>
       )}
       <span className="match-team match-team-b">
-        {teamB.name}
-        <TeamBadge team={teamB} />
+        <TeamName team={teamB} />
+        <TeamBadge team={teamB} mark="initial" />
       </span>
     </Link>
   );

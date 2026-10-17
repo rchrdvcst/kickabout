@@ -10,7 +10,7 @@ import { completedFixtures, fixtureSummaries, toFixtureRecord } from '../stats/q
 
 const teamBody = z.object({
   name: z.string().trim().min(1).max(60),
-  shortName: z.string().trim().min(1).max(5).toUpperCase(),
+  shortName: z.string().trim().min(1).max(3).toUpperCase(),
   crestUrl: z.url({ protocol: /^https?$/ }).nullable().optional(),
 });
 

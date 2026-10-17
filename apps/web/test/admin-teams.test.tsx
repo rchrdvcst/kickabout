@@ -10,7 +10,7 @@ const roster = (players: RosterPlayer[]) => ({ '/teams/t1/roster': { team: LEOES
 function fillNewTeam(name: string, shortName: string) {
   const form = screen.getByRole('form', { name: 'Novo time' });
   fireEvent.change(within(form).getByLabelText('Nome'), { target: { value: name } });
-  fireEvent.change(within(form).getByLabelText('Sigla (até 5 letras)'), { target: { value: shortName } });
+  fireEvent.change(within(form).getByLabelText('Tag (até 3 letras)'), { target: { value: shortName } });
   fireEvent.click(within(form).getByRole('button', { name: 'Cadastrar time' }));
 }
 

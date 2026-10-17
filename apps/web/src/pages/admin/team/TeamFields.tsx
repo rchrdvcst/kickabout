@@ -10,10 +10,10 @@ export function TeamFields({ value, onChange }: { value: TeamInput; onChange: (v
         <input required maxLength={60} value={value.name} onChange={(e) => onChange({ ...value, name: e.target.value })} />
       </label>
       <label className="field">
-        <span>Sigla (até 5 letras)</span>
+        <span>Tag (até 3 letras)</span>
         <input
           required
-          maxLength={5}
+          maxLength={3}
           value={value.shortName}
           onChange={(e) => onChange({ ...value, shortName: e.target.value.toUpperCase() })}
         />

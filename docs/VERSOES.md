@@ -4,6 +4,23 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.3 — 2026-10-17
+
+Ajustes para celular pedidos depois da revisão de design.
+
+- **Abas sem rolagem lateral:** no celular, as abas da página do campeonato (Chave/Tabela, Jogos, Times, Estatísticas) e da lista de campeonatos cabem na largura da tela, a partir de 320px. Cada aba tem o tamanho do próprio texto e as sobras se dividem entre elas.
+- **Tag do time em cima do nome:**
+  - nas linhas de confronto e nos placares de destaque, a tag aparece grande e o nome completo vem menor embaixo;
+  - quando o time não tem escudo, a placa mostra só a inicial do nome, já que a tag está ao lado;
+  - leitores de tela continuam ouvindo só o nome;
+  - nas listas, nomes muito longos param em 2 linhas, com hífen e reticências, já que a tag identifica o time.
+- **Tag com no máximo 3 caracteres:**
+  - o cadastro do time passou a chamar o campo de "Tag (até 3 letras)", e a API recusa tags maiores;
+  - a migração `20261017120000_team_tag_three_chars` cortou as tags existentes para os 3 primeiros caracteres.
+- **Lista de duelos da página do confronto:** a coluna do número ("1º", "2º"…) ficou estreita, sem o espaço grande antes do nome do jogador. O "Desempate" foi para uma linha só dele, em cima do duelo.
+
+---
+
 ## v1.2 — 2026-10-17
 
 Revisão completa de design, com foco no organizador, que é quem mais usa o Kickabout. O plano e o diagnóstico estão em `docs/design/2026-10-17-revisao-de-design.md`. Nenhuma regra nem a API mudaram.

@@ -1,5 +1,6 @@
 import type { TeamRef } from '../api/types';
 import { TeamBadge } from './TeamBadge';
+import { TeamName } from './TeamName';
 
 interface Props {
   teamA: TeamRef;
@@ -12,8 +13,10 @@ export function Scoreboard({ teamA, teamB, scoreA, scoreB }: Props) {
   return (
     <div className="scoreboard">
       <div className="scoreboard-team">
-        <TeamBadge team={teamA} size="lg" />
-        <span className="scoreboard-name">{teamA.name}</span>
+        <TeamBadge team={teamA} size="lg" mark="initial" />
+        <span className="scoreboard-name">
+          <TeamName team={teamA} />
+        </span>
       </div>
       <div className="scoreboard-score">
         {scoreA === null || scoreB === null ? (
@@ -30,8 +33,10 @@ export function Scoreboard({ teamA, teamB, scoreA, scoreB }: Props) {
         )}
       </div>
       <div className="scoreboard-team">
-        <TeamBadge team={teamB} size="lg" />
-        <span className="scoreboard-name">{teamB.name}</span>
+        <TeamBadge team={teamB} size="lg" mark="initial" />
+        <span className="scoreboard-name">
+          <TeamName team={teamB} />
+        </span>
       </div>
     </div>
   );

@@ -224,7 +224,7 @@
 
 .match-row {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
@@ -248,6 +248,50 @@
   line-height: 1.15;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+/* Tag em cima, nome completo menor embaixo */
+.team-label {
+  display: grid;
+  min-width: 0;
+}
+
+.team-tag {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.team-name {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--step--1);
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+/* Nas listas a tag já identifica o time: nomes longos param em 2 linhas */
+.match-team .team-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.match-team-b .team-label {
+  justify-items: end;
+}
+
+.scoreboard-name .team-tag {
+  font-size: var(--step-3);
+}
+
+.scoreboard-name .team-name {
+  font-size: var(--step-0);
 }
 
 .match-team-b {
@@ -520,12 +564,26 @@
 
 .duel-list > li {
   display: grid;
-  grid-template-columns: 4.5rem 1fr auto 1fr;
+  grid-template-columns: 2rem minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: 'order pa score pb';
   align-items: baseline;
-  gap: var(--space-3);
+  gap: var(--space-2);
   padding: var(--space-3) 0;
   border-top: 1px solid var(--line);
 }
+
+/* "Desempate" é longo para a coluna do número: fica numa linha só dele, em cima */
+.duel-list > li.duel-tiebreak {
+  grid-template-areas:
+    'order order order order'
+    '. pa score pb';
+  row-gap: var(--space-1);
+}
+
+.duel-list .duel-order { grid-area: order; }
+.duel-list .duel-player { grid-area: pa; }
+.duel-list .duel-player-b { grid-area: pb; }
+.duel-list .duel-score { grid-area: score; }
 
 .duel-order {
   color: var(--muted);
@@ -748,4 +806,20 @@ td.name a {
 .settings[open] summary {
   margin-bottom: var(--space-4);
   color: var(--chalk);
+}
+
+/* Celular: as abas ocupam a largura toda (cada uma do tamanho do texto, sobras divididas), sem rolagem para o lado */
+@media (max-width: 479px) {
+  .tabs {
+    gap: var(--space-1);
+    overflow-x: visible;
+  }
+
+  .tabs a {
+    flex: 1 1 auto;
+    padding: var(--space-2) var(--space-1);
+    font-size: var(--step--1);
+    text-align: center;
+    white-space: nowrap;
+  }
 }
