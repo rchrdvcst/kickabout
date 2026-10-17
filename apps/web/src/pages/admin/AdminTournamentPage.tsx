@@ -10,6 +10,7 @@ import { QueryState } from '../../components/QueryState';
 import { FORMAT_LABEL, STATUS_LABEL } from '../../lib/format';
 import { FixturesTab } from '../tournament/FixturesTab';
 import { EntriesEditor } from './tournament/EntriesEditor';
+import { KnockoutDraw } from './tournament/KnockoutDraw';
 import { TournamentFields } from './tournament/TournamentFields';
 
 export function AdminTournamentPage() {
@@ -34,9 +35,10 @@ export function AdminTournamentPage() {
           ) : (
             <>
               <p className="muted">Abra um confronto para lançar ou corrigir o resultado.</p>
+              {t.format === 'cup' && t.status === 'in_progress' && <KnockoutDraw tournament={t} />}
               <FixturesTab tournament={t} fixtureUrl={(matchId) => `/admin/campeonatos/${t.id}/jogos/${matchId}`} />
               {t.status === 'in_progress' ? (
-                <FinishSection tournament={t} />
+                (t.format !== 'cup' || t.knockoutDrawn) && <FinishSection tournament={t} />
               ) : (
                 <p className="notice">Campeonato encerrado. Os títulos já foram gerados.</p>
               )}
@@ -66,6 +68,7 @@ function SettingsForm({ tournament }: { tournament: Tournament }) {
     <form className="form" aria-label="Configuração" onSubmit={submit}>
       <h2>Configuração</h2>
       <TournamentFields
+        teamCount={tournament.entries.length}
         value={form}
         onChange={(value) => {
           update.reset();

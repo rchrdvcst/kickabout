@@ -4,6 +4,7 @@ import { AppError, notFound } from '../errors';
 import { activePlayerIds } from '../players/roster';
 import { lockTournament, withBracket, type BracketData } from '../tournaments/bracket-store';
 import { findMatch, laterCompletedMatchIds, matchView } from '../tournaments/bracket-view';
+import { groupsLockedError, knockoutStageOf } from '../tournaments/cup';
 
 export interface SaveResultInput {
   mode: 'draft' | 'final';
@@ -38,7 +39,6 @@ export async function saveResult(prisma: PrismaClient, tournamentId: string, mat
       if (tournament.status !== 'in_progress') {
         throw new AppError(409, 'TOURNAMENT_NOT_IN_PROGRESS', 'O campeonato não está em andamento.');
       }
-      const isKnockout = tournament.format !== 'round_robin';
 
       await withBracket(tx, tournamentId, async (manager) => {
         const data = await manager.export();
@@ -46,6 +46,8 @@ export async function saveResult(prisma: PrismaClient, tournamentId: string, mat
         if (!raw) throw notFound('Confronto');
         const view = matchView(data, raw);
         if (!view) throw new AppError(409, 'FIXTURE_NOT_READY', 'Os dois times deste confronto ainda não estão definidos.');
+        const isKnockout = view.phase === 'knockout';
+        if (tournament.format === 'cup' && view.phase === 'groups' && knockoutStageOf(data)) throw groupsLockedError();
 
         const key = { tournamentId_bmMatchId: { tournamentId, bmMatchId: matchId } };
         const existing = await tx.fixture.findUnique({ where: key, include: { duels: true } });

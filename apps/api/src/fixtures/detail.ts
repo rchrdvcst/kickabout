@@ -12,6 +12,7 @@ export interface FixtureListItem {
   groupNumber: number;
   roundNumber: number;
   number: number;
+  phase: 'groups' | 'knockout';
   isKnockout: boolean;
   status: FixtureStatusView;
   teamA: TeamRef;
@@ -20,12 +21,13 @@ export interface FixtureListItem {
   scoreB: number | null;
 }
 
-const toItem = (view: MatchView, isKnockout: boolean, status: FixtureStatusView, teams: Map<string, TeamRef>): FixtureListItem => ({
+const toItem = (view: MatchView, status: FixtureStatusView, teams: Map<string, TeamRef>): FixtureListItem => ({
   matchId: view.matchId,
   groupNumber: view.groupNumber,
   roundNumber: view.roundNumber,
   number: view.number,
-  isKnockout,
+  phase: view.phase,
+  isKnockout: view.phase === 'knockout',
   status,
   teamA: teams.get(view.teamAId)!,
   teamB: teams.get(view.teamBId)!,
@@ -40,18 +42,17 @@ async function bracketOf(db: Db, tournamentId: string) {
 }
 
 export async function listFixtures(db: Db, tournamentId: string): Promise<FixtureListItem[]> {
-  const { tournament, data } = await bracketOf(db, tournamentId);
+  const { data } = await bracketOf(db, tournamentId);
   if (!data) return [];
   const views = listMatches(data);
   const saved = await db.fixture.findMany({ where: { tournamentId }, select: { bmMatchId: true, status: true } });
   const statusByMatch = new Map(saved.map((f) => [f.bmMatchId, f.status]));
   const teams = await teamsById(db, views.flatMap((v) => [v.teamAId, v.teamBId]));
-  const isKnockout = tournament.format !== 'round_robin';
-  return views.map((v) => toItem(v, isKnockout, statusByMatch.get(v.matchId) ?? 'pending', teams));
+  return views.map((v) => toItem(v, statusByMatch.get(v.matchId) ?? 'pending', teams));
 }
 
 export async function getFixtureDetail(db: Db, tournamentId: string, matchId: number, includeRosters: boolean) {
-  const { tournament, data } = await bracketOf(db, tournamentId);
+  const { data } = await bracketOf(db, tournamentId);
   const raw = data ? findMatch(data, matchId) : undefined;
   if (!data || !raw) throw notFound('Confronto');
   const view = matchView(data, raw);
@@ -67,7 +68,7 @@ export async function getFixtureDetail(db: Db, tournamentId: string, matchId: nu
     },
   });
   const teams = await teamsById(db, [view.teamAId, view.teamBId]);
-  const item = toItem(view, tournament.format !== 'round_robin', fixture?.status ?? 'pending', teams);
+  const item = toItem(view, fixture?.status ?? 'pending', teams);
   const detail = {
     ...item,
     duels: (fixture?.duels ?? []).map((duel) => ({

@@ -4,7 +4,7 @@ import type { DuelView } from '../api/types';
 import { DuelStrip } from '../components/DuelStrip';
 import { QueryState } from '../components/QueryState';
 import { Scoreboard } from '../components/Scoreboard';
-import { outcomeOf, roundCounts, roundLabel } from '../lib/format';
+import { fixtureRoundLabel, outcomeOf } from '../lib/format';
 import { NotFoundPage } from './NotFoundPage';
 
 function DuelItem({ duel }: { duel: DuelView }) {
@@ -44,10 +44,7 @@ export function FixturePage() {
   return (
     <QueryState query={fixture}>
       {(f) => {
-        const counts = roundCounts(bracket.data?.data ?? null);
-        const round = tournament.data
-          ? roundLabel(tournament.data.format, f.groupNumber, f.roundNumber, counts.get(f.groupNumber) ?? f.roundNumber)
-          : null;
+        const round = tournament.data ? fixtureRoundLabel(tournament.data.format, bracket.data?.data ?? null, f) : null;
         return (
           <>
             <p className="hero-context">

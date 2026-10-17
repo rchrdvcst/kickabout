@@ -6,6 +6,7 @@ export const MIN_TEAMS: Record<TournamentFormat, number> = {
   single_elimination: 2,
   double_elimination: 3,
   round_robin: 2,
+  cup: 4,
 };
 
 export function nextPowerOfTwo(n: number): number {
@@ -49,5 +50,46 @@ export function stageInput(t: StageSource): InputStage {
           grandFinal: t.options.grandFinalReset ? 'double' : 'simple',
         },
       };
+    case 'cup':
+      throw new Error('A copa cria as fases com cupGroupStageInput e cupKnockoutStageInput.');
   }
+}
+
+/** Copa, fase 1: um pontos corridos com exatamente os grupos sorteados (seeds 1..n na ordem dos grupos). */
+export function cupGroupStageInput(
+  t: { id: string; name: string; options: TournamentOptions },
+  groups: { name: string; teamId: string }[][],
+): InputStage {
+  let seed = 0;
+  return {
+    tournamentId: t.id,
+    name: 'Fase de grupos',
+    type: 'round_robin',
+    seeding: groups.flat(),
+    settings: {
+      groupCount: groups.length,
+      roundRobinMode: t.options.roundRobinMode,
+      manualOrdering: groups.map((group) => group.map(() => ++seed)),
+    },
+  };
+}
+
+/**
+ * Copa, fase 2: eliminatória simples com as posições já sorteadas (ids de participante; null = BYE).
+ * Ordem natural sem rebalancear BYEs: as posições (0,1), (2,3)… viram os jogos da 1ª rodada.
+ */
+export function cupKnockoutStageInput(t: { id: string; options: TournamentOptions }, slots: (number | null)[]): InputStage {
+  const teams = slots.filter((slot) => slot !== null).length;
+  return {
+    tournamentId: t.id,
+    name: 'Mata-mata',
+    type: 'single_elimination',
+    seedingIds: slots,
+    settings: {
+      size: slots.length,
+      seedOrdering: ['natural'],
+      balanceByes: false,
+      consolationFinal: t.options.consolationFinal && teams >= 4,
+    },
+  };
 }

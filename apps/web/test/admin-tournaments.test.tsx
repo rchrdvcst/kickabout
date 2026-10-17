@@ -24,6 +24,7 @@ const pending: FixtureListItem = {
   groupNumber: 1,
   roundNumber: 1,
   number: 1,
+  phase: 'knockout',
   isKnockout: true,
   status: 'pending',
   teamA: LEOES,

@@ -72,6 +72,7 @@ kickabout/
 ### 3.2 Integração com brackets-manager.js (MIT)
 - Cada **confronto** corresponde a uma **match** do brackets-manager; o placar da match é o placar de duelos do confronto.
 - Formatos: `single_elimination` (opção de disputa de 3º lugar), `double_elimination` (opção de final com reset, `grandFinal: 'double'`), `round_robin` (turno único ou ida e volta).
+- Copa (grupos + mata-mata): ver `2026-10-17-kickabout-copa-design.md`.
 - O estado do brackets-manager de cada campeonato fica numa coluna JSON (`Tournament.bracket`). Cada operação abre uma transação, trava a linha do campeonato (`SELECT … FOR UPDATE`), carrega o JSON num banco em memória da biblioteca (`brackets-memory-db`), executa a operação e grava o JSON de volta na mesma transação.
 - A biblioteca só aceita chaves de eliminação com tamanho potência de 2: o Kickabout completa a chave com **BYEs** (`size` = próxima potência de 2, `balanceByes`).
 - A classificação do round robin é calculada pelo `shared` (critérios da seção 2.4), não pelo ranking padrão da biblioteca.

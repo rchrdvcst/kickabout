@@ -1,11 +1,20 @@
 import type { TournamentInput } from '../../../api/admin';
 import type { TournamentFormat, TournamentOptions } from '../../../api/types';
-import { FORMAT_LABEL } from '../../../lib/format';
+import { GROUP_COUNTS } from '@kickabout/shared';
+import { FORMAT_LABEL, cupSummary } from '../../../lib/format';
 
-const FORMATS: TournamentFormat[] = ['single_elimination', 'double_elimination', 'round_robin'];
+const FORMATS: TournamentFormat[] = ['single_elimination', 'double_elimination', 'round_robin', 'cup'];
 
 /** Nome, formato e só as opções que valem para o formato escolhido. */
-export function TournamentFields({ value, onChange }: { value: TournamentInput; onChange: (value: TournamentInput) => void }) {
+export function TournamentFields({
+  value,
+  onChange,
+  teamCount,
+}: {
+  value: TournamentInput;
+  onChange: (value: TournamentInput) => void;
+  teamCount?: number;
+}) {
   const set = (patch: Partial<TournamentInput>) => onChange({ ...value, ...patch });
   const setOption = (patch: Partial<TournamentOptions>) => set({ options: { ...value.options, ...patch } });
 
@@ -25,7 +34,7 @@ export function TournamentFields({ value, onChange }: { value: TournamentInput; 
           ))}
         </select>
       </label>
-      {value.format === 'single_elimination' && (
+      {(value.format === 'single_elimination' || value.format === 'cup') && (
         <label className="check">
           <input
             type="checkbox"
@@ -45,9 +54,9 @@ export function TournamentFields({ value, onChange }: { value: TournamentInput; 
           <span>Final com reset (quem vem da chave inferior precisa vencer duas vezes)</span>
         </label>
       )}
-      {value.format === 'round_robin' && (
+      {(value.format === 'round_robin' || value.format === 'cup') && (
         <label className="field">
-          <span>Turnos</span>
+          <span>{value.format === 'cup' ? 'Fase de grupos' : 'Turnos'}</span>
           <select
             value={value.options.roundRobinMode ?? 'simple'}
             onChange={(e) => setOption({ roundRobinMode: e.target.value as TournamentOptions['roundRobinMode'] })}
@@ -56,6 +65,36 @@ export function TournamentFields({ value, onChange }: { value: TournamentInput; 
             <option value="double">Ida e volta</option>
           </select>
         </label>
+      )}
+      {value.format === 'cup' && (
+        <>
+          <label className="field">
+            <span>Número de grupos</span>
+            <select value={value.options.groupCount ?? 2} onChange={(e) => setOption({ groupCount: Number(e.target.value) })}>
+              {GROUP_COUNTS.map((count) => (
+                <option key={count} value={count}>
+                  {count} grupos
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Classificados por grupo</span>
+            <input
+              type="number"
+              min={1}
+              max={63}
+              required
+              value={value.options.qualifiersPerGroup ?? 2}
+              onChange={(e) => setOption({ qualifiersPerGroup: Number(e.target.value) })}
+            />
+          </label>
+          <p className="muted" role="status">
+            {teamCount === undefined
+              ? 'Os grupos são sorteados depois da inscrição dos times.'
+              : cupSummary(teamCount, value.options.groupCount ?? 2, value.options.qualifiersPerGroup ?? 2)}
+          </p>
+        </>
       )}
     </>
   );

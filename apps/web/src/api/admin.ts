@@ -72,3 +72,7 @@ export const reopenResult = (id: string, matchId: number) =>
 
 export const createTitle = (input: TitleInput) => apiRequest<TitleEntry>('POST', '/titles', input);
 export const deleteTitle = (id: string) => apiRequest<{ ok: true }>('DELETE', `/titles/${id}`);
+
+export const drawGroups = (id: string) => apiRequest<{ groups: TeamRef[][] }>('POST', `/tournaments/${id}/group-draw`);
+export const drawKnockout = (id: string) => apiRequest<Tournament>('POST', `/tournaments/${id}/knockout-draw`);
+export const undoKnockoutDraw = (id: string) => apiRequest<Tournament>('DELETE', `/tournaments/${id}/knockout-draw`);

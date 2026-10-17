@@ -2,7 +2,7 @@ import { useBracket, useTournamentFixtures } from '../../api/queries';
 import type { FixtureListItem, Tournament } from '../../api/types';
 import { MatchRow } from '../../components/MatchRow';
 import { QueryState } from '../../components/QueryState';
-import { roundCounts, roundLabel } from '../../lib/format';
+import { fixtureRoundLabel } from '../../lib/format';
 
 interface Props {
   tournament: Tournament;
@@ -13,7 +13,6 @@ interface Props {
 export function FixturesTab({ tournament, fixtureUrl = (matchId) => `/campeonatos/${tournament.id}/jogos/${matchId}` }: Props) {
   const fixtures = useTournamentFixtures(tournament.id);
   const bracket = useBracket(tournament.id);
-  const counts = roundCounts(bracket.data?.data ?? null);
 
   return (
     <QueryState
@@ -24,14 +23,14 @@ export function FixturesTab({ tournament, fixtureUrl = (matchId) => `/campeonato
       {(list) => {
         const rounds = new Map<string, FixtureListItem[]>();
         for (const fixture of list) {
-          const key = `${fixture.groupNumber}-${fixture.roundNumber}`;
+          const key = `${fixture.phase}-${fixture.groupNumber}-${fixture.roundNumber}`;
           rounds.set(key, [...(rounds.get(key) ?? []), fixture]);
         }
         return [...rounds.values()].map((round) => {
           const first = round[0]!;
-          const title = roundLabel(tournament.format, first.groupNumber, first.roundNumber, counts.get(first.groupNumber) ?? first.roundNumber);
+          const title = fixtureRoundLabel(tournament.format, bracket.data?.data ?? null, first);
           return (
-            <section key={`${first.groupNumber}-${first.roundNumber}`}>
+            <section key={`${first.phase}-${first.groupNumber}-${first.roundNumber}`}>
               <h2>{title}</h2>
               <ul className="list">
                 {round.map((fixture) => (

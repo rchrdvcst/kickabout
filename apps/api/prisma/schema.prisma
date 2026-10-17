@@ -72,6 +72,7 @@ enum TournamentFormat {
   single_elimination
   double_elimination
   round_robin
+  cup
 }
 
 enum TournamentStatus {
@@ -92,6 +93,8 @@ model Tournament {
   status     TournamentStatus  @default(draft)
   options    Json
   bracket    Json?
+  /// Copa em rascunho: prévia do sorteio dos grupos (lista de grupos, cada um com ids de time).
+  groupDraw  Json?
   ownerId    String
   owner      User              @relation(fields: [ownerId], references: [id])
   createdAt  DateTime          @default(now())

@@ -823,3 +823,7 @@ td.name a {
     white-space: nowrap;
   }
 }
+/* Copa: classificados do grupo, com um filete verde à esquerda */
+tr.qualified td:first-child {
+  box-shadow: inset 3px 0 0 var(--grass);
+}
