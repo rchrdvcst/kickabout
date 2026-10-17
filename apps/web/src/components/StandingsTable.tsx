@@ -4,10 +4,10 @@ import { TeamBadge } from './TeamBadge';
 
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
-export function StandingsTable({ rows }: { rows: StandingRow[] }) {
+export function StandingsTable({ rows, label = 'Classificação' }: { rows: StandingRow[]; label?: string }) {
   return (
     <div className="table-wrap">
-      <table aria-label="Classificação">
+      <table aria-label={label}>
         <thead>
           <tr>
             <th scope="col">#</th>
@@ -36,7 +36,7 @@ export function StandingsTable({ rows }: { rows: StandingRow[] }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.teamId}>
+            <tr key={row.teamId} className={row.qualified ? 'qualified' : undefined}>
               <td>{row.position}</td>
               <td className="name">
                 <Link to={`/times/${row.team.id}`}>

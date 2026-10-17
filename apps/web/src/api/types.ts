@@ -1,4 +1,5 @@
-export type TournamentFormat = 'single_elimination' | 'double_elimination' | 'round_robin';
+export type TournamentFormat = 'single_elimination' | 'double_elimination' | 'round_robin' | 'cup';
+export type Phase = 'groups' | 'knockout';
 export type TournamentStatus = 'draft' | 'in_progress' | 'finished';
 export type FixtureStatus = 'pending' | 'draft' | 'completed';
 
@@ -38,11 +39,17 @@ export interface Tournament {
   name: string;
   format: TournamentFormat;
   status: TournamentStatus;
-  options: { consolationFinal: boolean; grandFinalReset: boolean; roundRobinMode: 'simple' | 'double' };
+  options: TournamentOptions;
   createdAt: string;
   startedAt: string | null;
   finishedAt: string | null;
   entries: { seed: number; team: TeamRef }[];
+  /** Copa em rascunho: prévia do sorteio dos grupos. */
+  groupDraw?: TeamRef[][] | null;
+  /** Copa: o mata-mata já foi sorteado. */
+  knockoutDrawn?: boolean;
+  /** Copa: confrontos dos grupos ainda sem resultado confirmado (null antes de começar). */
+  groupsPending?: number | null;
 }
 
 export interface FixtureListItem {
@@ -50,6 +57,7 @@ export interface FixtureListItem {
   groupNumber: number;
   roundNumber: number;
   number: number;
+  phase: Phase;
   isKnockout: boolean;
   status: FixtureStatus;
   teamA: TeamRef;
@@ -88,6 +96,8 @@ export interface StandingRow {
   goalsAgainst: number;
   goalDiff: number;
   team: TeamRef;
+  groupNumber: number;
+  qualified?: boolean;
 }
 
 export interface PlayerStats {
@@ -175,11 +185,11 @@ export interface TitlesData {
 
 /** Estado do brackets-manager (só os campos usados pelo site; o resto vai direto para o brackets-viewer). */
 export interface BracketData {
-  stage: unknown[];
+  stage: { id: number; number: number; type: string }[];
   group: { id: number; stage_id: number; number: number }[];
-  round: { id: number; group_id: number; number: number }[];
-  match: unknown[];
-  match_game: unknown[];
+  round: { id: number; stage_id: number; group_id: number; number: number }[];
+  match: { id: number; stage_id: number }[];
+  match_game: { stage_id: number }[];
   participant: { id: number; name: string }[];
 }
 
@@ -202,4 +212,6 @@ export interface TournamentOptions {
   consolationFinal: boolean;
   grandFinalReset: boolean;
   roundRobinMode: 'simple' | 'double';
+  groupCount?: number;
+  qualifiersPerGroup?: number;
 }

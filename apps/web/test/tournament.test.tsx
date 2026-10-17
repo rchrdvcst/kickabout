@@ -23,11 +23,11 @@ const tournament = (overrides: Partial<Tournament> = {}): Tournament => ({
 });
 
 const bracket: BracketData = {
-  stage: [{ id: 0 }],
+  stage: [{ id: 0, number: 1, type: 'single_elimination' }],
   group: [{ id: 0, stage_id: 0, number: 1 }],
   round: [
-    { id: 0, group_id: 0, number: 1 },
-    { id: 1, group_id: 0, number: 2 },
+    { id: 0, stage_id: 0, group_id: 0, number: 1 },
+    { id: 1, stage_id: 0, group_id: 0, number: 2 },
   ],
   match: [],
   match_game: [],
@@ -39,6 +39,7 @@ const fixture = (overrides: Partial<FixtureListItem>): FixtureListItem => ({
   groupNumber: 1,
   roundNumber: 1,
   number: 1,
+  phase: 'knockout',
   isKnockout: true,
   status: 'completed',
   teamA: LEOES,

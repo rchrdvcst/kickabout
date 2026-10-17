@@ -5,6 +5,7 @@ export const MATCH_STATUS = { Locked: 0, Waiting: 1, Ready: 2, Running: 3, Compl
 
 export interface MatchView {
   matchId: number;
+  phase: 'groups' | 'knockout';
   groupNumber: number;
   roundNumber: number;
   number: number;
@@ -31,6 +32,7 @@ export function matchView(data: BracketData, match: Match): MatchView | null {
   if (!teamAId || !teamBId) return null;
   return {
     matchId: Number(match.id),
+    phase: data.stage.find((stage) => stage.id === match.stage_id)?.type === 'round_robin' ? 'groups' : 'knockout',
     groupNumber: data.group.find((g) => g.id === match.group_id)?.number ?? 1,
     roundNumber: data.round.find((r) => r.id === match.round_id)?.number ?? 1,
     number: match.number,

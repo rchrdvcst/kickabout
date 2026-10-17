@@ -48,7 +48,13 @@ describe('stageInput', () => {
 
 describe('normalizeOptions', () => {
   it('fills defaults', () => {
-    expect(normalizeOptions()).toEqual({ consolationFinal: false, grandFinalReset: false, roundRobinMode: 'simple' });
+    expect(normalizeOptions()).toEqual({
+      consolationFinal: false,
+      grandFinalReset: false,
+      roundRobinMode: 'simple',
+      groupCount: 2,
+      qualifiersPerGroup: 2,
+    });
   });
 });
 

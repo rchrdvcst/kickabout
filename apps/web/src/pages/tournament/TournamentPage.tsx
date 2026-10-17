@@ -5,6 +5,7 @@ import { Tabs } from '../../components/Tabs';
 import { FORMAT_LABEL, STATUS_LABEL } from '../../lib/format';
 import { BracketTab } from './BracketTab';
 import { FixturesTab } from './FixturesTab';
+import { GroupsTab } from './GroupsTab';
 import { StandingsTab } from './StandingsTab';
 import { StatsTab } from './StatsTab';
 import { TeamsTab } from './TeamsTab';
@@ -17,13 +18,15 @@ export function TournamentPage() {
   return (
     <QueryState query={tournament}>
       {(t) => {
+        const cup = t.format === 'cup';
         const tabs = [
+          ...(cup ? [{ id: 'grupos', label: 'Grupos' }] : []),
           { id: 'chave', label: t.format === 'round_robin' ? 'Tabela' : 'Chave' },
           { id: 'jogos', label: 'Jogos' },
           { id: 'times', label: 'Times' },
           { id: 'estatisticas', label: 'Estatísticas' },
         ];
-        const current = tabs.find((tab) => tab.id === params.get('aba'))?.id ?? 'chave';
+        const current = tabs.find((tab) => tab.id === params.get('aba'))?.id ?? tabs[0]!.id;
         const notStarted = t.status === 'draft' && current !== 'times';
 
         return (
@@ -37,10 +40,16 @@ export function TournamentPage() {
             <Tabs param="aba" items={tabs} current={current} label="Seções do campeonato" />
             {notStarted ? (
               <p className="state">
-                {t.format === 'round_robin' ? 'A tabela aparece quando o campeonato começar.' : 'A chave aparece quando o campeonato começar.'}
+                {cup
+                  ? 'Os grupos aparecem quando o campeonato começar.'
+                  : t.format === 'round_robin'
+                    ? 'A tabela aparece quando o campeonato começar.'
+                    : 'A chave aparece quando o campeonato começar.'}
               </p>
+            ) : current === 'grupos' ? (
+              <GroupsTab tournament={t} />
             ) : current === 'chave' ? (
-              t.format === 'round_robin' ? <StandingsTab id={t.id} /> : <BracketTab id={t.id} />
+              t.format === 'round_robin' ? <StandingsTab id={t.id} /> : <BracketTab tournament={t} />
             ) : current === 'jogos' ? (
               <FixturesTab tournament={t} />
             ) : current === 'times' ? (

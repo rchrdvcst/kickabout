@@ -3,7 +3,8 @@ import type { BracketsManager } from 'brackets-manager';
 import type { ParticipantResult } from 'brackets-model';
 import { AppError, notFound } from '../errors';
 import { lockTournament, withBracket } from '../tournaments/bracket-store';
-import { MATCH_STATUS, findMatch, laterCompletedMatchIds } from '../tournaments/bracket-view';
+import { MATCH_STATUS, findMatch, laterCompletedMatchIds, matchView } from '../tournaments/bracket-view';
+import { groupsLockedError, knockoutStageOf } from '../tournaments/cup';
 import { pruneStaleDrafts, resultLockedError } from './save-result';
 
 const withoutScore = (opponent: ParticipantResult | null): ParticipantResult | null =>
@@ -45,11 +46,13 @@ export async function reopenResult(prisma: PrismaClient, tournamentId: string, m
       if (fixture?.status !== 'completed') {
         throw new AppError(409, 'FIXTURE_NOT_COMPLETED', 'Este confronto não tem resultado confirmado.');
       }
-      const roundRobin = tournament.format === 'round_robin';
 
       await withBracket(tx, tournamentId, async (manager) => {
         const data = await manager.export();
-        if (!findMatch(data, matchId)) throw notFound('Confronto');
+        const raw = findMatch(data, matchId);
+        if (!raw) throw notFound('Confronto');
+        const roundRobin = matchView(data, raw)?.phase === 'groups';
+        if (tournament.format === 'cup' && roundRobin && knockoutStageOf(data)) throw groupsLockedError();
         // A biblioteca deixa passar casos em que o perdedor já jogou adiante (3º lugar, chave inferior, inclusive via BYE).
         if (!roundRobin) {
           const blocking = laterCompletedMatchIds(data, matchId);

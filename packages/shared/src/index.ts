@@ -6,3 +6,4 @@ export * from './validate-result';
 export * from './standings';
 export * from './stats';
 export * from './phone';
+export * from './cup';

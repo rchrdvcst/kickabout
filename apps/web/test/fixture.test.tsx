@@ -19,6 +19,7 @@ const detail = (overrides: Partial<FixtureDetail> = {}): FixtureDetail => ({
   groupNumber: 1,
   roundNumber: 2,
   number: 1,
+  phase: 'knockout',
   isKnockout: true,
   status: 'completed',
   teamA: LEOES,

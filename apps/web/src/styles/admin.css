@@ -484,3 +484,28 @@ textarea {
 .bulk-result .issue-list {
   color: var(--flag);
 }
+/* Sorteios da copa */
+.draw-block {
+  margin: var(--space-5) 0;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--grass);
+  border-radius: var(--radius-sm);
+}
+
+.draw-block h2 {
+  margin-top: 0;
+}
+
+.draw-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.draw-groups h3 {
+  margin: 0 0 var(--space-1);
+  color: var(--muted);
+}

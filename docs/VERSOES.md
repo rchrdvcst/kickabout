@@ -4,6 +4,25 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.5 — 2026-10-17
+
+Novo formato **Copa (grupos + mata-mata)**. Spec: `docs/superpowers/specs/2026-10-17-kickabout-copa-design.md`.
+
+- **Criação:** o organizador escolhe o número de grupos (2, 4, 8, 16, 32 ou 64), quantos passam por grupo, o turno da fase de grupos (único ou ida e volta) e se há disputa de 3º lugar. Um resumo mostra os tamanhos dos grupos e o tamanho do mata-mata (com BYEs).
+- **Sorteio dos grupos:** feito no rascunho, com prévia e "Sortear de novo". Mudar inscrições ou opções apaga a prévia, e o campeonato só inicia com um sorteio feito.
+- **Fase de grupos:** pontos corridos dentro de cada grupo, com as regras de sempre (empate vale, mesmo desempate). No site, a aba **Grupos** mostra uma tabela por grupo, com os classificados marcados.
+- **Sorteio do mata-mata:** com os grupos encerrados, o organizador sorteia a chave. Times do mesmo grupo não se enfrentam na primeira rodada, e os BYEs também são sorteados. Dá para sortear de novo ou desfazer enquanto nenhum jogo do mata-mata tiver resultado. Depois do sorteio, os jogos dos grupos ficam travados para correção.
+- **Mata-mata e títulos:** eliminatória simples (6º duelo e pênaltis, 3º lugar opcional). Campeão, vice e 3º saem do mata-mata.
+- **API:**
+  - formato `cup`;
+  - opções `groupCount` e `qualifiersPerGroup`;
+  - endpoints `POST /tournaments/:id/group-draw`, `POST` e `DELETE /tournaments/:id/knockout-draw`;
+  - os confrontos ganham `phase`;
+  - a classificação ganha `groupNumber` e `qualified`.
+- **Migração:** `20261017180000_cup_mode`.
+
+---
+
 ## v1.4 — 2026-10-17
 
 Cadastro de jogadores mais rápido e com suporte a estrangeiros.
