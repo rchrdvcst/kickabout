@@ -25,6 +25,13 @@ export const STATUS_LABEL: Record<TournamentStatus, string> = {
   finished: 'Encerrado',
 };
 
+/** Mínimo de times para iniciar (igual a `apps/api/src/tournaments/stage.ts`). */
+export const MIN_TEAMS: Record<TournamentFormat, number> = {
+  single_elimination: 2,
+  double_elimination: 3,
+  round_robin: 2,
+};
+
 export const percent = (rate: number): string => `${Math.round(rate * 100)}%`;
 
 export function formatDate(iso: string | null): string {

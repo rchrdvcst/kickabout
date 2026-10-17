@@ -1,7 +1,9 @@
 import type { RouteObject } from 'react-router';
+import { adminRoutes } from './admin-routes';
 import { Layout } from './components/Layout';
 import { ErrorPage } from './pages/ErrorPage';
 import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { TournamentsPage } from './pages/TournamentsPage';
 import { TournamentPage } from './pages/tournament/TournamentPage';
@@ -11,6 +13,7 @@ import { TeamPage } from './pages/TeamPage';
 import { TeamBidPage } from './pages/TeamBidPage';
 import { PlayerPage } from './pages/PlayerPage';
 import { TitlesPage } from './pages/TitlesPage';
+import { AdminLayout } from './pages/admin/AdminLayout';
 
 export const routes: RouteObject[] = [
   {
@@ -31,6 +34,8 @@ export const routes: RouteObject[] = [
           { path: 'times/:id/bid', element: <TeamBidPage /> },
           { path: 'jogadores/:id', element: <PlayerPage /> },
           { path: 'titulos', element: <TitlesPage /> },
+          { path: 'entrar', element: <LoginPage /> },
+          { path: 'admin', element: <AdminLayout />, children: adminRoutes },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

@@ -16,6 +16,9 @@ export function Layout() {
       <main className="page">
         <Outlet />
       </main>
+      <footer className="footer">
+        <Link to="/admin">Área do organizador</Link>
+      </footer>
     </div>
   );
 }

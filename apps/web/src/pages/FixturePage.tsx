@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router';
-import { useBracket, useFixture, useTournament } from '../api/queries';
+import { useBracket, useFixture, useMe, useTournament } from '../api/queries';
 import type { DuelView } from '../api/types';
 import { DuelStrip } from '../components/DuelStrip';
 import { QueryState } from '../components/QueryState';
@@ -35,6 +35,7 @@ export function FixturePage() {
   const fixture = useFixture(id, Number(matchId));
   const tournament = useTournament(id);
   const bracket = useBracket(id);
+  const me = useMe();
 
   return (
     <QueryState query={fixture}>
@@ -52,6 +53,13 @@ export function FixturePage() {
             <h1 className="visually-hidden">
               {f.teamA.name} contra {f.teamB.name}
             </h1>
+            {me.data?.user && (
+              <p>
+                <Link to={`/admin/campeonatos/${id}/jogos/${f.matchId}`} className="button-link">
+                  {f.status === 'completed' ? 'Corrigir resultado' : 'Lançar resultado'}
+                </Link>
+              </p>
+            )}
             <Scoreboard teamA={f.teamA} teamB={f.teamB} scoreA={f.scoreA} scoreB={f.scoreB} />
             {f.status === 'pending' ? (
               <p className="state">Aguardando resultado.</p>

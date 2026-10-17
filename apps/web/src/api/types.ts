@@ -182,3 +182,24 @@ export interface BracketData {
   match_game: unknown[];
   participant: { id: number; name: string }[];
 }
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: string;
+}
+
+/** Jogador como o admin vê (sempre com celular). */
+export interface AdminPlayer {
+  id: string;
+  name: string;
+  phone: string;
+  whatsappUrl: string;
+  team: TeamRef | null;
+}
+
+export interface TournamentOptions {
+  consolationFinal: boolean;
+  grandFinalReset: boolean;
+  roundRobinMode: 'simple' | 'double';
+}

@@ -1,0 +1,203 @@
+/* Formulários */
+.form {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 32rem;
+  margin-bottom: var(--space-5);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.field > span {
+  color: var(--muted);
+  font-size: var(--step--1);
+  font-weight: 500;
+}
+
+.check {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  color: var(--chalk);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.check input {
+  width: auto;
+}
+
+.narrow {
+  max-width: 26rem;
+}
+
+/* Botões */
+.button {
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-weight: 600;
+  color: var(--grass-ink);
+  background: var(--grass);
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  color: var(--chalk);
+  background: var(--surface-2);
+}
+
+.button-danger {
+  color: #2a0703;
+  background: var(--flag);
+}
+
+.button-small {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--step--1);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.confirm {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.issue-list {
+  margin-top: var(--space-2);
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+/* Estrutura do admin */
+.admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.admin-bar .tabs {
+  margin-bottom: 0;
+}
+
+.admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.admin-row .row-title {
+  flex: 1 1 10rem;
+}
+
+.footer {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-5) 16px var(--space-6);
+  border-top: 1px solid var(--line);
+  font-size: var(--step--1);
+}
+
+.footer a {
+  color: var(--muted);
+}
+
+/* Lançamento de resultado */
+.result-grid > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.25rem 3.25rem minmax(0, 1fr);
+  grid-template-areas:
+    'label label label label'
+    'pa ga gb pb';
+  align-items: end;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.result-grid > li.duel-tiebreak {
+  grid-template-areas:
+    'label label label label'
+    'pa ga gb pb'
+    'plabel plabel plabel plabel'
+    '. pena penb .';
+}
+
+.result-grid .duel-label,
+.result-grid .duel-pen-label {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.result-grid .duel-label { grid-area: label; }
+.result-grid .duel-pen-label { grid-area: plabel; }
+.result-grid .duel-pa { grid-area: pa; }
+.result-grid .duel-ga { grid-area: ga; }
+.result-grid .duel-gb { grid-area: gb; }
+.result-grid .duel-pb { grid-area: pb; }
+.result-grid .duel-pena { grid-area: pena; }
+.result-grid .duel-penb { grid-area: penb; }
+
+.result-grid .duel-tiebreak .duel-label,
+.result-grid .duel-tiebreak .duel-pen-label {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+/* Celular: cada time numa linha (jogador + gols), para o nome escolhido caber */
+@media (max-width: 479px) {
+  .result-grid > li {
+    grid-template-columns: minmax(0, 1fr) 3.25rem;
+    grid-template-areas:
+      'label label'
+      'pa ga'
+      'pb gb';
+  }
+
+  .result-grid > li.duel-tiebreak {
+    grid-template-areas:
+      'label label'
+      'pa ga'
+      'pb gb'
+      'plabel plabel'
+      '. pena'
+      '. penb';
+  }
+}
+
+.result-grid input {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

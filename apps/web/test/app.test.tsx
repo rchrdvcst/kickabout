@@ -32,4 +32,9 @@ describe('layout', () => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
   });
+  it('links to the organizer area from the footer', async () => {
+    mockApi({});
+    renderRoute('/rota-que-nao-existe');
+    expect(await screen.findByRole('link', { name: 'Área do organizador' })).toHaveAttribute('href', '/admin');
+  });
 });

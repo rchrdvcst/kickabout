@@ -4,7 +4,13 @@ import { MatchRow } from '../../components/MatchRow';
 import { QueryState } from '../../components/QueryState';
 import { roundCounts, roundLabel } from '../../lib/format';
 
-export function FixturesTab({ tournament }: { tournament: Tournament }) {
+interface Props {
+  tournament: Tournament;
+  /** Endereço de cada confronto (o admin aponta para a tela de lançamento). */
+  fixtureUrl?: (matchId: number) => string;
+}
+
+export function FixturesTab({ tournament, fixtureUrl = (matchId) => `/campeonatos/${tournament.id}/jogos/${matchId}` }: Props) {
   const fixtures = useTournamentFixtures(tournament.id);
   const bracket = useBracket(tournament.id);
   const counts = roundCounts(bracket.data?.data ?? null);
@@ -31,7 +37,7 @@ export function FixturesTab({ tournament }: { tournament: Tournament }) {
                 {round.map((fixture) => (
                   <li key={fixture.matchId}>
                     <MatchRow
-                      to={`/campeonatos/${tournament.id}/jogos/${fixture.matchId}`}
+                      to={fixtureUrl(fixture.matchId)}
                       teamA={fixture.teamA}
                       teamB={fixture.teamB}
                       scoreA={fixture.scoreA}

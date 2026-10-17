@@ -33,3 +33,8 @@ export const tournamentListItem = (overrides: Partial<TournamentListItem> = {}):
   finishedAt: null,
   ...overrides,
 });
+
+export const ADMIN = { id: 'u1', email: 'admin@kickabout.local', role: 'admin' };
+
+/** Rotas de API de um organizador logado. */
+export const SIGNED_IN = { '/auth/me': { user: ADMIN } };

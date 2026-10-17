@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { apiGet } from './client';
 import type {
+  AdminPlayer,
+  AuthUser,
   BracketData,
   FixtureDetail,
   FixtureListItem,
@@ -55,3 +57,14 @@ export const useRoster = (id: string) =>
 export const usePlayer = (id: string) => useQuery({ queryKey: ['player', id], queryFn: () => apiGet<PlayerPageData>(`/players/${id}`) });
 
 export const useTitles = () => useQuery({ queryKey: ['titles'], queryFn: () => apiGet<TitlesData>('/titles') });
+
+export const useMe = () =>
+  useQuery({ queryKey: ['me'], queryFn: () => apiGet<{ user: AuthUser | null }>('/auth/me'), staleTime: 60_000 });
+
+export const useAdminPlayers = (search: string, enabled = true) =>
+  useQuery({
+    queryKey: ['players', 'admin', search],
+    queryFn: () => apiGet<AdminPlayer[]>(search ? `/players?search=${encodeURIComponent(search)}` : '/players'),
+    placeholderData: keepPreviousData,
+    enabled,
+  });
