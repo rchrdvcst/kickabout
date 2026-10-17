@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiError } from './client';
+import { forgetSession } from './session';
 
 /**
  * Escrita na API. Ao dar certo, marca todas as consultas como desatualizadas (o site é pequeno: simples e sempre correto).
@@ -11,7 +12,7 @@ export function useApiMutation<TVars, TResult>(mutationFn: (vars: TVars) => Prom
     mutationFn,
     onSuccess: () => client.invalidateQueries(),
     onError: (error) => {
-      if (error instanceof ApiError && error.status === 401) client.setQueryData(['me'], { user: null });
+      if (error instanceof ApiError && error.status === 401) forgetSession(client);
     },
   });
 }

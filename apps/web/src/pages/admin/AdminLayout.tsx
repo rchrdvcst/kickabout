@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { logout } from '../../api/admin';
 import { useMe } from '../../api/queries';
+import { forgetSession } from '../../api/session';
 import { QueryState } from '../../components/QueryState';
 
 /** Tudo em /admin exige login; sem sessão, vai para /entrar e volta para cá depois. */
@@ -13,8 +14,7 @@ export function AdminLayout() {
   const exit = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      client.setQueryData(['me'], { user: null });
-      void client.invalidateQueries();
+      forgetSession(client);
       navigate('/');
     },
   });

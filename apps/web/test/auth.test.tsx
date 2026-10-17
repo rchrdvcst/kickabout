@@ -1,7 +1,7 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { safeRedirect } from '../src/lib/redirect';
-import { ADMIN, SIGNED_IN } from './data';
+import { ADMIN, LEOES, SIGNED_IN } from './data';
 import { mockApi, renderRoute, sentBodies } from './utils';
 
 function signIn(email: string, password: string) {
@@ -78,5 +78,54 @@ describe('sign in', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Sair' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/'));
     expect(sentBodies(fetchMock, 'POST /auth/logout')).toHaveLength(1);
+  });
+});
+
+describe('end of session', () => {
+  const ana = { id: 'p1', name: 'Ana', phone: '+5511987654321', whatsappUrl: 'https://wa.me/5511987654321' };
+
+  /** Com PHONE_VISIBILITY=authenticated, o elenco só traz celulares para quem está logado. */
+  function phoneVisibleOnlyWhileSignedIn(extra: Record<string, unknown> = {}) {
+    const session = { user: ADMIN as typeof ADMIN | null };
+    mockApi({
+      '/auth/me': () => ({ user: session.user }),
+      '/teams/t1/roster': () => ({ team: LEOES, players: session.user ? [ana] : [{ id: 'p1', name: 'Ana' }] }),
+      'POST /auth/logout': () => {
+        session.user = null;
+        return { ok: true };
+      },
+      '/fixtures/recent?limit=8': [],
+      '/tournaments?status=in_progress': [],
+      ...extra,
+    });
+    return session;
+  }
+
+  it('forgets admin-only data (phones) when signing out', async () => {
+    phoneVisibleOnlyWhileSignedIn();
+    const { router } = renderRoute('/admin/times/t1');
+    expect(await screen.findByText('(11) 98765-4321')).toBeInTheDocument();
+    // Sai de outra página: o elenco fica só no cache, sem ninguém para buscá-lo de novo.
+    await act(() => router.navigate('/admin'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Sair' }));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+    await act(() => router.navigate('/times/t1/bid'));
+    expect(screen.queryByText('(11) 98765-4321')).toBeNull();
+    expect(await screen.findByRole('link', { name: 'Ana' })).toBeInTheDocument();
+  });
+
+  it('forgets admin-only data (phones) when the session expires', async () => {
+    const session = phoneVisibleOnlyWhileSignedIn({
+      'PUT /players/p1/team': () => {
+        session.user = null;
+        return new Response(JSON.stringify({ error: { code: 'UNAUTHENTICATED', message: 'Faça login para continuar.' } }), { status: 401 });
+      },
+    });
+    const { router } = renderRoute('/admin/times/t1');
+    fireEvent.click(await screen.findByRole('button', { name: 'Remover Ana do elenco' }));
+    expect(await screen.findByRole('heading', { name: 'Entrar' })).toBeInTheDocument();
+    await act(() => router.navigate('/times/t1/bid'));
+    expect(screen.queryByText('(11) 98765-4321')).toBeNull();
+    expect(await screen.findByRole('link', { name: 'Ana' })).toBeInTheDocument();
   });
 });
