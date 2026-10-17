@@ -70,7 +70,7 @@ export function FixturePage() {
             ) : (
               <>
                 {f.status === 'draft' && <p className="notice">Resultado parcial: ainda faltam duelos.</p>}
-                <DuelStrip duels={f.duels} teamA={f.teamA.name} teamB={f.teamB.name} />
+                <DuelStrip duels={f.duels} teamA={f.teamA.name} teamB={f.teamB.name} tags={[f.teamA.shortName, f.teamB.shortName]} />
                 <ol className="duel-list" aria-label="Duelos">
                   {f.duels.map((duel) => (
                     <DuelItem key={duel.order} duel={duel} />

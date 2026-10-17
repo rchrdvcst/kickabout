@@ -24,7 +24,7 @@ describe('session and cache', () => {
   });
 
   it('tells when signing out fails', async () => {
-    mockApi({ ...SIGNED_IN, 'POST /auth/logout': () => failure(500, 'INTERNAL', 'Erro interno.') });
+    mockApi({ ...SIGNED_IN, '/tournaments?status=in_progress': [], 'POST /auth/logout': () => failure(500, 'INTERNAL', 'Erro interno.') });
     const { router } = renderRoute('/admin');
     fireEvent.click(await screen.findByRole('button', { name: 'Sair' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Erro interno.');

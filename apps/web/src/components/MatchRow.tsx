@@ -21,20 +21,20 @@ export function MatchRow({ to, teamA, teamB, scoreA, scoreB, status, caption }: 
         <TeamBadge team={teamA} />
         {teamA.name}
       </span>
-      <span className="match-score">
-        {status === 'completed' && scoreA !== null && scoreB !== null ? (
-          <>
-            {scoreA}
-            <span className="sep" aria-hidden="true">
-              ×
-            </span>
-            <span className="visually-hidden"> a </span>
-            {scoreB}
-          </>
-        ) : (
+      {status === 'completed' && scoreA !== null && scoreB !== null ? (
+        <span className="match-score">
+          {scoreA}
+          <span className="sep" aria-hidden="true">
+            ×
+          </span>
+          <span className="visually-hidden"> a </span>
+          {scoreB}
+        </span>
+      ) : (
+        <span className="match-status">
           <StatusChip status={status} />
-        )}
-      </span>
+        </span>
+      )}
       <span className="match-team match-team-b">
         {teamB.name}
         <TeamBadge team={teamB} />

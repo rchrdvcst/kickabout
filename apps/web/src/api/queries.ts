@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query';
 import { apiGet } from './client';
 import type {
   AdminPlayer,
@@ -35,8 +35,15 @@ export const useTournament = (id: string) =>
 export const useBracket = (id: string, enabled = true) =>
   useQuery({ queryKey: ['tournament', id, 'bracket'], queryFn: () => apiGet<{ data: BracketData | null }>(`/tournaments/${id}/bracket`), enabled });
 
-export const useTournamentFixtures = (id: string) =>
-  useQuery({ queryKey: ['tournament', id, 'fixtures'], queryFn: () => apiGet<FixtureListItem[]>(`/tournaments/${id}/fixtures`) });
+const fixturesQuery = (id: string) => ({
+  queryKey: ['tournament', id, 'fixtures'],
+  queryFn: () => apiGet<FixtureListItem[]>(`/tournaments/${id}/fixtures`),
+});
+
+export const useTournamentFixtures = (id: string) => useQuery(fixturesQuery(id));
+
+/** Confrontos de vários campeonatos, na mesma ordem dos ids (mesmo cache de `useTournamentFixtures`). */
+export const useFixturesOf = (ids: string[]) => useQueries({ queries: ids.map(fixturesQuery) });
 
 export const useStandings = (id: string) =>
   useQuery({ queryKey: ['tournament', id, 'standings'], queryFn: () => apiGet<StandingRow[]>(`/tournaments/${id}/standings`) });

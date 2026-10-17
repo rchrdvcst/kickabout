@@ -26,13 +26,16 @@ export function AdminLayout() {
         user ? (
           <>
             <div className="admin-bar">
-              <nav aria-label="Administração" className="tabs">
+              <nav aria-label="Administração" className="admin-nav">
+                <NavLink to="/admin" end className="admin-home">
+                  Organizador
+                </NavLink>
                 <NavLink to="/admin/campeonatos">Campeonatos</NavLink>
                 <NavLink to="/admin/times">Times</NavLink>
                 <NavLink to="/admin/jogadores">Jogadores</NavLink>
                 <NavLink to="/admin/titulos">Títulos</NavLink>
               </nav>
-              <button type="button" className="button button-secondary button-small" disabled={exit.isPending} onClick={() => exit.mutate()}>
+              <button type="button" className="admin-exit" disabled={exit.isPending} onClick={() => exit.mutate()}>
                 Sair
               </button>
             </div>

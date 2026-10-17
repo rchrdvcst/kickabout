@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
-import { useRecentFixtures, useTournaments } from '../api/queries';
+import { useFixture, useRecentFixtures, useTournaments } from '../api/queries';
+import { DuelStrip } from '../components/DuelStrip';
 import { MatchRow } from '../components/MatchRow';
 import { QueryState } from '../components/QueryState';
 import { Scoreboard } from '../components/Scoreboard';
@@ -37,6 +38,7 @@ export function HomePage() {
                 <Link to={fixtureUrl(latest.tournamentId, latest.matchId)} className="hero-link">
                   <Scoreboard teamA={latest.teamA} teamB={latest.teamB} scoreA={latest.scoreA} scoreB={latest.scoreB} />
                 </Link>
+                <HeroDuels tournamentId={latest.tournamentId} matchId={latest.matchId} />
               </section>
             )}
             {rest.length > 0 && (
@@ -79,4 +81,11 @@ export function HomePage() {
       </p>
     </>
   );
+}
+
+/** Os duelos 1 × 1 do último resultado: o que só o Kickabout tem. Sem os duelos (ainda carregando ou erro), some sem aviso. */
+function HeroDuels({ tournamentId, matchId }: { tournamentId: string; matchId: number }) {
+  const fixture = useFixture(tournamentId, matchId);
+  if (!fixture.data || fixture.data.duels.length === 0) return null;
+  return <DuelStrip duels={fixture.data.duels} teamA={fixture.data.teamA.name} teamB={fixture.data.teamB.name} tags={[fixture.data.teamA.shortName, fixture.data.teamB.shortName]} />;
 }

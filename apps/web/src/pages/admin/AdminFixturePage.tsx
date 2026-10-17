@@ -22,7 +22,10 @@ export function AdminFixturePage() {
                 <Link to={`/admin/campeonatos/${id}`}>{t.name}</Link>
               </p>
               <h1>
-                {f.teamA.name} contra {f.teamB.name}
+                {f.status === 'completed' ? 'Corrigir resultado' : 'Lançar resultado'}
+                <span className="visually-hidden">
+                  : {f.teamA.name} contra {f.teamB.name}
+                </span>
               </h1>
               {t.status !== 'in_progress' ? (
                 <p className="notice">Só é possível lançar resultados com o campeonato em andamento.</p>

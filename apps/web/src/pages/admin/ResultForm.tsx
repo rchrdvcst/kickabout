@@ -5,10 +5,11 @@ import { reopenResult, saveResult } from '../../api/admin';
 import { ApiError } from '../../api/client';
 import { useApiMutation } from '../../api/mutation';
 import { useTournamentFixtures } from '../../api/queries';
-import type { FixtureDetail, PlayerRef } from '../../api/types';
+import type { FixtureDetail, PlayerRef, TeamRef } from '../../api/types';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { FormError } from '../../components/FormError';
 import { Scoreboard } from '../../components/Scoreboard';
+import { TeamBadge } from '../../components/TeamBadge';
 import {
   TIEBREAK_INDEX,
   duelsToSend,
@@ -103,7 +104,19 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
 
   return (
     <form aria-label="Resultado do confronto" onSubmit={submit}>
-      <Scoreboard teamA={fixture.teamA} teamB={fixture.teamB} scoreA={score.scoreA} scoreB={score.scoreB} />
+      <div className="result-live">
+        <Scoreboard teamA={fixture.teamA} teamB={fixture.teamB} scoreA={score.scoreA} scoreB={score.scoreB} />
+      </div>
+      <div className="result-heads" aria-hidden="true">
+        <span>
+          <TeamBadge team={fixture.teamA} />
+          {teamA}
+        </span>
+        <span>
+          {teamB}
+          <TeamBadge team={fixture.teamB} />
+        </span>
+      </div>
       <ol className="result-grid">
         {rows.slice(0, TIEBREAK_INDEX).map((row, index) => (
           <DuelFields
@@ -111,8 +124,8 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
             index={index}
             row={row}
             rows={rows}
-            teamA={teamA}
-            teamB={teamB}
+            teamA={fixture.teamA}
+            teamB={fixture.teamB}
             rosterA={rosterA}
             rosterB={rosterB}
             onChange={(patch) => update(index, patch)}
@@ -123,8 +136,8 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
             index={TIEBREAK_INDEX}
             row={rows[TIEBREAK_INDEX]!}
             rows={rows}
-            teamA={teamA}
-            teamB={teamB}
+            teamA={fixture.teamA}
+            teamB={fixture.teamB}
             rosterA={rosterA}
             rosterB={rosterB}
             onChange={(patch) => update(TIEBREAK_INDEX, patch)}
@@ -160,7 +173,7 @@ export function ResultForm({ tournamentId, fixture, rosterA, rosterB }: Props) {
         </p>
       )}
 
-      <div className="actions">
+      <div className="actions result-actions">
         {fixture.status !== 'completed' && (
           <button type="button" className="button button-secondary" disabled={save.isPending} onClick={() => send('draft')}>
             Salvar rascunho
@@ -191,14 +204,16 @@ interface FieldsProps {
   index: number;
   row: DuelRow;
   rows: DuelRow[];
-  teamA: string;
-  teamB: string;
+  teamA: TeamRef;
+  teamB: TeamRef;
   rosterA: PlayerRef[];
   rosterB: PlayerRef[];
   onChange: (patch: Partial<DuelRow>) => void;
 }
 
-function DuelFields({ index, row, rows, teamA, teamB, rosterA, rosterB, onChange }: FieldsProps) {
+function DuelFields({ index, row, rows, teamA: refA, teamB: refB, rosterA, rosterB, onChange }: FieldsProps) {
+  const teamA = refA.name;
+  const teamB = refB.name;
   const tiebreak = index === TIEBREAK_INDEX;
   const label = tiebreak ? 'Desempate' : `${index + 1}º duelo`;
   const goals = (side: 'A' | 'B') => (
@@ -207,6 +222,7 @@ function DuelFields({ index, row, rows, teamA, teamB, rosterA, rosterB, onChange
       aria-label={`${label}: gols de ${side === 'A' ? teamA : teamB}`}
       inputMode="numeric"
       maxLength={2}
+      placeholder="–"
       value={side === 'A' ? row.goalsA : row.goalsB}
       onChange={(e) => onChange(side === 'A' ? { goalsA: e.target.value } : { goalsB: e.target.value })}
     />
@@ -230,10 +246,16 @@ function DuelFields({ index, row, rows, teamA, teamB, rosterA, rosterB, onChange
   return (
     <li className={tiebreak ? 'duel-tiebreak' : undefined}>
       <span className="duel-label">{tiebreak ? 'Desempate (6º duelo): qualquer jogador do elenco' : label}</span>
+      <span className="duel-ta">
+        <TeamBadge team={refA} />
+      </span>
       {player('A')}
       {goals('A')}
       {goals('B')}
       {player('B')}
+      <span className="duel-tb">
+        <TeamBadge team={refB} />
+      </span>
       {tiebreak && penaltiesNeeded(row) && (
         <>
           <span className="duel-pen-label">Pênaltis</span>
@@ -242,6 +264,7 @@ function DuelFields({ index, row, rows, teamA, teamB, rosterA, rosterB, onChange
             aria-label={`Pênaltis de ${teamA}`}
             inputMode="numeric"
             maxLength={2}
+            placeholder="–"
             value={row.penaltiesA}
             onChange={(e) => onChange({ penaltiesA: e.target.value })}
           />
@@ -250,6 +273,7 @@ function DuelFields({ index, row, rows, teamA, teamB, rosterA, rosterB, onChange
             aria-label={`Pênaltis de ${teamB}`}
             inputMode="numeric"
             maxLength={2}
+            placeholder="–"
             value={row.penaltiesB}
             onChange={(e) => onChange({ penaltiesB: e.target.value })}
           />

@@ -4,6 +4,39 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.2 — 2026-10-17
+
+Revisão completa de design, com foco no organizador, que é quem mais usa o Kickabout. O plano e o diagnóstico estão em `docs/design/2026-10-17-revisao-de-design.md`. Nenhuma regra nem a API mudaram.
+
+### Área do organizador
+- **Mesa do organizador (`/admin`):** abre com **"Para lançar"**, os confrontos sem resultado ou com rascunho dos campeonatos em andamento, agrupados por campeonato. Cada linha leva direto à súmula. Os cadastros (campeonatos, times, jogadores, títulos) vêm depois.
+- **Uma barra só:**
+  - dentro do admin, o menu público sai e entra a faixa do organizador, com "Organizador", as seções e "Sair";
+  - o topo mostra "Ver site";
+  - no celular, as seções rolam para o lado e "Sair" fica sempre visível.
+- **Campeonato:** os confrontos vêm primeiro e o "Encerrar" logo depois. "Renomear campeonato" fica recolhido no fim da página.
+- **Súmula (lançar resultado):**
+  - o título diz "Lançar resultado" ou "Corrigir resultado", em vez de repetir os nomes dos times;
+  - o placar ao vivo fica preso no topo enquanto se preenche os duelos;
+  - um cabeçalho mostra de que time é cada coluna;
+  - no computador, cada duelo é uma linha numerada de 1 a 5 (6 no desempate);
+  - no celular, cada duelo vira duas linhas, com o escudo do time na frente;
+  - gols preenchidos ficam com a borda verde e os vazios mostram "–";
+  - no celular, "Salvar rascunho" e "Confirmar resultado" ficam presos no fim da tela, lado a lado.
+
+### Site público
+- **Página inicial:** abaixo do placar do último resultado aparece a **barra dos duelos**, com a sigla de quem venceu cada duelo. Ela também aparece na página do confronto.
+- **Verde = venceu:** na barra de duelos, ficam em verde os duelos ganhos pelo vencedor do confronto, como no placar. Os do outro time ficam em branco e os empates em cinza.
+- **Confronto sem resultado:** o chip ("A jogar", "Parcial") aparece sozinho, fora da caixinha preta de placar.
+- **"Encerrado":** passou a usar o verde-gramado da logo. O verde-limão ficou para o que pede ação e para o vencedor.
+
+### Tipografia
+- Escala de terça maior (×1,25) sobre 16px.
+- Títulos de página em caixa normal (não mais em caixa alta), porque nomes de time longos viravam blocos de 4 linhas.
+- Parágrafos limitados a 65 caracteres por linha.
+
+---
+
 ## v1.1 — 2026-10-17
 
 Novo visual do site, em modo escuro com a identidade da logo. Nenhuma regra ou funcionalidade mudou.

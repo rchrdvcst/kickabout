@@ -18,12 +18,14 @@
   --font-body: 'Barlow', system-ui, sans-serif;
   --font-display: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
 
-  --step--1: 0.875rem;
+  /* Escala de terça maior (×1,25) sobre 16px */
+  --step--1: 0.8rem;
   --step-0: 1rem;
   --step-1: 1.25rem;
-  --step-2: 1.625rem;
-  --step-3: 2.5rem;
-  --step-4: 4rem;
+  --step-2: 1.5625rem;
+  --step-3: 1.953rem;
+  --step-4: 2.441rem;
+  --step-5: 3.815rem;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -36,4 +38,6 @@
   --radius: 12px;
   /* Inclinação da logo, usada em botões e placares */
   --slant: -8deg;
+  /* Altura da barra do topo (logo 3,25rem + respiro), para o que gruda logo abaixo dela */
+  --topbar-h: 4.25rem;
 }

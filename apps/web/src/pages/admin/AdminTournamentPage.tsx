@@ -33,8 +33,6 @@ export function AdminTournamentPage() {
             </>
           ) : (
             <>
-              <RenameForm key={t.id} tournament={t} />
-              <h2>Confrontos</h2>
               <p className="muted">Abra um confronto para lançar ou corrigir o resultado.</p>
               <FixturesTab tournament={t} fixtureUrl={(matchId) => `/admin/campeonatos/${t.id}/jogos/${matchId}`} />
               {t.status === 'in_progress' ? (
@@ -42,6 +40,11 @@ export function AdminTournamentPage() {
               ) : (
                 <p className="notice">Campeonato encerrado. Os títulos já foram gerados.</p>
               )}
+              {/* Configuração depois do trabalho: renomear é raro. */}
+              <details className="settings">
+                <summary>Renomear campeonato</summary>
+                <RenameForm key={t.id} tournament={t} />
+              </details>
             </>
           )}
         </>
