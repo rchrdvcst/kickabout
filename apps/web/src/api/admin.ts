@@ -4,12 +4,14 @@ import type {
   AdminPlayer,
   AuthUser,
   FixtureDetail,
+  Role,
   TeamRef,
   TeamSummary,
   TitleEntry,
   Tournament,
   TournamentFormat,
   TournamentOptions,
+  UserListItem,
 } from './types';
 
 export interface TeamInput {
@@ -40,6 +42,8 @@ export interface TitleInput {
 export const login = (email: string, password: string) =>
   apiRequest<{ user: AuthUser }>('POST', '/auth/login', { email, password });
 export const logout = () => apiRequest<{ ok: true }>('POST', '/auth/logout');
+export const loginWithGoogle = (credential: string) => apiRequest<{ user: AuthUser }>('POST', '/auth/google', { credential });
+export const setUserRole = (id: string, role: Role) => apiRequest<UserListItem>('PATCH', `/users/${id}`, { role });
 
 export const createTeam = (input: TeamInput) => apiRequest<TeamSummary>('POST', '/teams', input);
 export const updateTeam = (id: string, input: TeamInput) => apiRequest<TeamRef>('PATCH', `/teams/${id}`, input);

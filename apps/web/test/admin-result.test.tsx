@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { FixtureDetail, Tournament } from '../src/api/types';
-import { FALCOES, LEOES, SIGNED_IN, TIGRES } from './data';
+import { FALCOES, LEOES, REGULAR, SIGNED_IN, TIGRES } from './data';
 import { mockApi, renderRoute, sentBodies, type ApiRoutes } from './utils';
 
 const rosterA = Array.from({ length: 6 }, (_, i) => ({ id: `a${i + 1}`, name: `Ana ${i + 1}` }));
@@ -184,6 +184,20 @@ describe('result entry', () => {
     });
     renderRoute('/campeonatos/c1/jogos/0');
     expect(await screen.findByRole('link', { name: 'Corrigir resultado' })).toHaveAttribute('href', '/admin/campeonatos/c1/jogos/0');
+  });
+
+  it('does not offer the shortcut to regular users', async () => {
+    mockApi({
+      '/auth/me': { user: REGULAR },
+      '/tournaments/c1': tournament('in_progress'),
+      '/tournaments/c1/bracket': { data: null },
+      '/tournaments/c1/fixtures/0': fixture({ status: 'completed', scoreA: 3, scoreB: 2 }),
+    });
+    renderRoute('/campeonatos/c1/jogos/0');
+    expect(await screen.findByText('Leões contra Tigres')).toBeInTheDocument();
+    await screen.findByRole('group', { name: 'Conta de Ana Souza' });
+    expect(screen.queryByRole('link', { name: /resultado/ })).toBeNull();
+    expect(document.body.innerHTML).not.toContain('/admin');
   });
 });
 

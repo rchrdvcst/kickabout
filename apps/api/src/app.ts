@@ -9,6 +9,7 @@ import { registerPlayerRoutes } from './players/routes';
 import { registerTeamRoutes } from './teams/routes';
 import { registerTitleRoutes } from './titles/routes';
 import { registerTournamentRoutes } from './tournaments/routes';
+import { registerUserRoutes } from './users/routes';
 
 export function buildApp(deps: AppDeps & { logger?: boolean }): FastifyInstance {
   const app = Fastify({ logger: deps.logger ?? false });
@@ -24,6 +25,7 @@ export function buildApp(deps: AppDeps & { logger?: boolean }): FastifyInstance 
       registerTournamentRoutes(api, deps);
       registerFixtureRoutes(api, deps);
       registerTitleRoutes(api, deps);
+      registerUserRoutes(api, deps);
       api.get('/health', async () => ({ ok: true }));
     },
     { prefix: '/api' },

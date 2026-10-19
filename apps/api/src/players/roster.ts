@@ -11,8 +11,9 @@ export interface RosterPlayer {
   whatsappUrl?: string;
 }
 
+/** Celulares: públicos, ou só para organizadores com PHONE_VISIBILITY=authenticated. */
 export const canSeePhones = (request: FastifyRequest, config: AppConfig): boolean =>
-  config.phoneVisibility === 'public' || request.user !== null;
+  config.phoneVisibility === 'public' || request.user?.role === 'admin';
 
 export function rosterPlayer(player: { id: string; name: string; phone: string }, showPhone: boolean): RosterPlayer {
   return showPhone

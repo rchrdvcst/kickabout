@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../src/app';
 import type { AppConfig } from '../src/config';
 import { hashPassword } from '../src/auth/password';
+import type { AppDeps } from '../src/deps';
 
 export const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
 
@@ -13,12 +14,13 @@ export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     phoneVisibility: 'public',
     sessionTtlDays: 30,
     secureCookies: false,
+    googleClientId: null,
     ...overrides,
   };
 }
 
-export function createTestApp(overrides: Partial<AppConfig> = {}): FastifyInstance {
-  return buildApp({ prisma, config: testConfig(overrides) });
+export function createTestApp(overrides: Partial<AppConfig> = {}, deps: Partial<Pick<AppDeps, 'verifyGoogleToken'>> = {}): FastifyInstance {
+  return buildApp({ prisma, config: testConfig(overrides), ...deps });
 }
 
 export async function resetDb() {
@@ -32,10 +34,25 @@ export const ADMIN = { email: 'admin@kickabout.test', password: 'senha-forte-123
 export async function loginAdmin(app: FastifyInstance): Promise<string> {
   await prisma.user.upsert({
     where: { email: ADMIN.email },
-    create: { email: ADMIN.email, passwordHash: await hashPassword(ADMIN.password) },
+    create: { email: ADMIN.email, passwordHash: await hashPassword(ADMIN.password), role: 'admin' },
     update: {},
   });
   const res = await app.inject({ method: 'POST', url: '/api/auth/login', payload: ADMIN });
+  const cookie = res.cookies.find((c) => c.name === 'kb_session');
+  if (!cookie) throw new Error(`login falhou: ${res.statusCode} ${res.body}`);
+  return `kb_session=${cookie.value}`;
+}
+
+export const USER_PASSWORD = 'senha-comum-123';
+
+/** Cookie de um usuário comum (não organizador), com senha para entrar sem o Google. */
+export async function loginUser(app: FastifyInstance, email = 'ana@kickabout.test'): Promise<string> {
+  await prisma.user.upsert({
+    where: { email },
+    create: { email, passwordHash: await hashPassword(USER_PASSWORD), role: 'user' },
+    update: {},
+  });
+  const res = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email, password: USER_PASSWORD } });
   const cookie = res.cookies.find((c) => c.name === 'kb_session');
   if (!cookie) throw new Error(`login falhou: ${res.statusCode} ${res.body}`);
   return `kb_session=${cookie.value}`;

@@ -18,6 +18,7 @@ import type {
   Tournament,
   TournamentListItem,
   TournamentStatus,
+  UserListItem,
 } from './types';
 
 export const useRecentFixtures = (limit: number) =>
@@ -71,6 +72,16 @@ export const useTitles = () => useQuery({ queryKey: ['titles'], queryFn: () => a
 
 export const useMe = () =>
   useQuery({ queryKey: ['me'], queryFn: () => apiGet<{ user: AuthUser | null }>('/auth/me'), staleTime: 60_000 });
+
+/** Configuração pública do login; não muda enquanto a página está aberta. */
+export const useAuthConfig = () =>
+  useQuery({
+    queryKey: ['auth-config'],
+    queryFn: () => apiGet<{ googleClientId: string | null }>('/auth/config'),
+    staleTime: Infinity,
+  });
+
+export const useUsers = () => useQuery({ queryKey: ['users'], queryFn: () => apiGet<UserListItem[]>('/users') });
 
 export const useAdminPlayers = (search: string, enabled = true) =>
   useQuery({

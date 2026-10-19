@@ -9,7 +9,15 @@ describe('loadConfig', () => {
       phoneVisibility: 'public',
       sessionTtlDays: 30,
       secureCookies: false,
+      googleClientId: null,
     });
+  });
+
+  it('reads the Google client id', () => {
+    expect(loadConfig({ DATABASE_URL: 'x', GOOGLE_CLIENT_ID: ' abc.apps.googleusercontent.com ' }).googleClientId).toBe(
+      'abc.apps.googleusercontent.com',
+    );
+    expect(loadConfig({ DATABASE_URL: 'x', GOOGLE_CLIENT_ID: '' }).googleClientId).toBeNull();
   });
 
   it('reads overrides and enables secure cookies in production', () => {
