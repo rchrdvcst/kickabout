@@ -1,7 +1,7 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { safeRedirect } from '../src/lib/redirect';
-import { ADMIN, LEOES, SIGNED_IN } from './data';
+import { ADMIN, LEOES, REGULAR, SIGNED_IN } from './data';
 import { mockApi, renderRoute, sentBodies } from './utils';
 
 function signIn(email: string, password: string) {
@@ -20,6 +20,23 @@ describe('safeRedirect', () => {
 });
 
 describe('sign in', () => {
+  it('sends a regular user who signs in with a password to the home page', async () => {
+    let user: typeof REGULAR | null = null;
+    mockApi({
+      '/auth/me': () => ({ user }),
+      'POST /auth/login': () => {
+        user = REGULAR;
+        return { user: REGULAR };
+      },
+      '/fixtures/recent?limit=8': [],
+      '/tournaments?status=in_progress': [],
+    });
+    const { router } = renderRoute('/entrar?voltar=%2Fadmin');
+    await screen.findByRole('heading', { name: 'Entrar' });
+    signIn('ana@gmail.com', 'segredo123');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'));
+  });
+
   it('sends signed-out visitors to the login page, remembering where they were going', async () => {
     mockApi({ '/auth/me': { user: null } });
     const { router } = renderRoute('/admin');

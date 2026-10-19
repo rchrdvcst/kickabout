@@ -64,4 +64,17 @@ describe('auth', () => {
     expect(res.statusCode).toBe(400);
     expect(res.json()).toMatchObject({ error: { code: 'INVALID_REQUEST' } });
   });
+
+  it('refuses password login for an account without a password, with the generic message', async () => {
+    await prisma.user.create({ data: { email: 'google@kickabout.test', googleId: 'g-1' } });
+    const res = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email: 'google@kickabout.test', password: 'qualquer' } });
+    expect(res.statusCode).toBe(401);
+    expect(res.json()).toEqual({ error: { code: 'INVALID_CREDENTIALS', message: 'Email ou senha inválidos.' } });
+  });
+
+  it('records the last login time', async () => {
+    await loginAdmin(app);
+    const user = await prisma.user.findUniqueOrThrow({ where: { email: ADMIN.email } });
+    expect(user.lastLoginAt).toBeInstanceOf(Date);
+  });
 });

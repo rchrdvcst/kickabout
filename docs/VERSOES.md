@@ -4,6 +4,33 @@ Este documento registra o que cada versão entrega. A cada nova versão, acresce
 
 ---
 
+## v1.7 — 2026-10-19
+
+Login com Google e papéis de usuário. Spec: `docs/superpowers/specs/2026-10-19-kickabout-login-google-design.md`.
+
+- **Entrar com Google:** a página Entrar ganhou o botão "Fazer login com o Google", acima do formulário de email e senha, que continua igual.
+- **Qualquer pessoa entra:** quem entra com o Google pela primeira vez vira **usuário comum**. Por enquanto, o usuário comum só fica logado (foto e nome no topo, com "Sair").
+- **Organizadores:**
+  - só organizadores acessam o admin; o admin que já existia continua organizador;
+  - se o organizador entrar com uma conta Google do mesmo email, cai na mesma conta;
+  - um organizador promove e rebaixa usuários na tela nova **Usuários** do admin, com confirmação em dois cliques;
+  - ninguém tira o próprio papel, e o sistema nunca fica sem organizador.
+- **Admin escondido:** usuário comum não vê nenhum link para o admin, e `/admin` mostra "Página não encontrada". O rodapé passou a dizer "Entrar" (só para quem não está logado), e organizadores chegam ao admin pelo menu da conta no topo.
+- **Celulares com `PHONE_VISIBILITY=authenticated`:** só organizadores veem (antes, bastava estar logado).
+- **API:**
+  - `GET /auth/config` e `POST /auth/google`;
+  - `GET /users` e `PATCH /users/:id` (só organizador);
+  - usuário comum recebe 403 "Sua conta não é de organizador." nas rotas do admin;
+  - `/auth/me` devolve também `name` e `avatarUrl`.
+- **Migração:** `20261019120000_google_login` (senha opcional, conta Google, nome, foto, último acesso; papel padrão `user`).
+- **Como ligar o botão do Google:**
+  1. Em console.cloud.google.com, crie um projeto e configure a tela de consentimento OAuth (tipo "Externo").
+  2. Em Credenciais, crie um "ID do cliente OAuth" do tipo "Aplicativo da Web".
+  3. Em "Origens JavaScript autorizadas", adicione `http://localhost:5173` e o endereço de produção. Não precisa de URI de redirecionamento.
+  4. Copie o Client ID para `GOOGLE_CLIENT_ID` em `apps/api/.env` e reinicie a API. Sem ele, o site mostra só email e senha.
+
+---
+
 ## v1.6 — 2026-10-17
 
 O organizador pode excluir um campeonato.

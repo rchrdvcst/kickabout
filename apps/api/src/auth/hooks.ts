@@ -19,4 +19,5 @@ export function registerAuth(app: FastifyInstance, { prisma }: AppDeps) {
 
 export async function requireAdmin(request: FastifyRequest) {
   if (!request.user) throw new AppError(401, 'UNAUTHENTICATED', 'Faça login para continuar.');
+  if (request.user.role !== 'admin') throw new AppError(403, 'FORBIDDEN', 'Sua conta não é de organizador.');
 }

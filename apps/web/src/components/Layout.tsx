@@ -1,8 +1,12 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import { useMe } from '../api/queries';
+import { AccountMenu } from './AccountMenu';
 
 export function Layout() {
-  // Na área do organizador, a barra dele (AdminLayout) substitui o menu público.
-  const inAdmin = /^\/admin(\/|$)/.test(useLocation().pathname);
+  const user = useMe().data?.user ?? null;
+  // Na área do organizador, a barra dele (AdminLayout) substitui o menu público. Para quem não é organizador,
+  // /admin é uma página inexistente qualquer, com o layout público.
+  const inAdmin = /^\/admin(\/|$)/.test(useLocation().pathname) && user?.role === 'admin';
 
   return (
     <div className="shell">
@@ -15,19 +19,22 @@ export function Layout() {
             Ver site
           </Link>
         ) : (
-          <nav aria-label="Principal" className="mainnav">
-            <NavLink to="/campeonatos">Campeonatos</NavLink>
-            <NavLink to="/times">Times</NavLink>
-            <NavLink to="/titulos">Títulos</NavLink>
-          </nav>
+          <>
+            <nav aria-label="Principal" className="mainnav">
+              <NavLink to="/campeonatos">Campeonatos</NavLink>
+              <NavLink to="/times">Times</NavLink>
+              <NavLink to="/titulos">Títulos</NavLink>
+            </nav>
+            {user && <AccountMenu user={user} />}
+          </>
         )}
       </header>
       <main className="page">
         <Outlet />
       </main>
-      {!inAdmin && (
+      {!inAdmin && !user && (
         <footer className="footer">
-          <Link to="/admin">Área do organizador</Link>
+          <Link to="/entrar">Entrar</Link>
         </footer>
       )}
     </div>

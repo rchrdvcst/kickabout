@@ -54,7 +54,7 @@ export function FixturePage() {
             <h1 className="visually-hidden">
               {f.teamA.name} contra {f.teamB.name}
             </h1>
-            {me.data?.user && tournament.data?.status === 'in_progress' && (
+            {me.data?.user?.role === 'admin' && tournament.data?.status === 'in_progress' && (
               <p>
                 <Link to={`/admin/campeonatos/${id}/jogos/${f.matchId}`} className="button-link">
                   {f.status === 'completed' ? 'Corrigir resultado' : 'Lançar resultado'}

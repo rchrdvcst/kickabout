@@ -12,6 +12,10 @@ if (!email || !password || password.length < 8) {
 
 const prisma = createPrisma(loadConfig().databaseUrl);
 const passwordHash = await hashPassword(password);
-await prisma.user.upsert({ where: { email }, create: { email, passwordHash }, update: { passwordHash } });
+await prisma.user.upsert({
+  where: { email },
+  create: { email, passwordHash, role: 'admin' },
+  update: { passwordHash, role: 'admin' },
+});
 console.log(`Admin ${email} pronto.`);
 await prisma.$disconnect();

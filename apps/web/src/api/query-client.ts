@@ -10,8 +10,11 @@ export function createQueryClient({ retry = true, staleTime = 30_000 }: { retry?
   const client: QueryClient = new QueryClient({
     queryCache: new QueryCache({
       onError: (error, query) => {
+        if (!(error instanceof ApiError) || query.queryKey[0] === 'me') return;
         // Sessão expirada numa página do admin que só lê: vai para o login, como numa escrita.
-        if (error instanceof ApiError && error.status === 401 && query.queryKey[0] !== 'me') forgetSession(client);
+        if (error.status === 401) forgetSession(client);
+        // Perdeu o papel de organizador: busca a sessão de novo e o admin some.
+        if (error.status === 403) void client.invalidateQueries({ queryKey: ['me'] });
       },
     }),
     defaultOptions: { queries: { staleTime, retry: retry ? shouldRetry : false } },

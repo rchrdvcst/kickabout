@@ -193,10 +193,27 @@ export interface BracketData {
   participant: { id: number; name: string }[];
 }
 
+export type Role = 'admin' | 'user';
+
 export interface AuthUser {
   id: string;
   email: string;
-  role: string;
+  name: string | null;
+  avatarUrl: string | null;
+  role: Role;
+}
+
+/** Usuário como a tela de usuários do admin vê. */
+export interface UserListItem {
+  id: string;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+  role: Role;
+  hasPassword: boolean;
+  hasGoogle: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
 }
 
 /** Jogador como o admin vê (sempre com celular). */

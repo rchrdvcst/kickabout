@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { createPlayer, createTeam, createTestApp, loginAdmin, prisma, resetDb } from './helpers';
+import { createPlayer, createTeam, createTestApp, loginAdmin, loginUser, prisma, resetDb } from './helpers';
 
 const app = createTestApp();
 afterAll(() => app.close());
@@ -86,6 +86,10 @@ describe('players and BID', () => {
 
     const admin = await privateApp.inject({ method: 'GET', url: `/api/teams/${team.id}/roster`, headers: { cookie } });
     expect(admin.json().players[0]).toHaveProperty('phone');
+
+    const regular = await loginUser(privateApp);
+    const asUser = await privateApp.inject({ method: 'GET', url: `/api/teams/${team.id}/roster`, headers: { cookie: regular } });
+    expect(asUser.json().players).toEqual([{ id: player.id, name: 'Ana' }]);
     await privateApp.close();
   });
 

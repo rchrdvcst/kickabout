@@ -34,7 +34,8 @@ export const tournamentListItem = (overrides: Partial<TournamentListItem> = {}):
   ...overrides,
 });
 
-export const ADMIN = { id: 'u1', email: 'admin@kickabout.local', role: 'admin' };
+export const ADMIN = { id: 'u1', email: 'admin@kickabout.local', name: null, avatarUrl: null, role: 'admin' as const };
+export const REGULAR = { id: 'u2', email: 'ana@gmail.com', name: 'Ana Souza', avatarUrl: null, role: 'user' as const };
 
 /** Rotas de API de um organizador logado. */
 export const SIGNED_IN = { '/auth/me': { user: ADMIN } };

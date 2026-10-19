@@ -89,6 +89,11 @@
     height: 2.5rem;
   }
 
+  /* Logado, a foto da conta divide a linha com os links */
+  .topbar:has(.account) .mainnav {
+    gap: var(--space-2);
+  }
+
   :root {
     --topbar-h: 3.5rem;
   }
@@ -826,4 +831,106 @@ td.name a {
 /* Copa: classificados do grupo, com um filete verde à esquerda */
 tr.qualified td:first-child {
   box-shadow: inset 3px 0 0 var(--grass);
+}
+
+/* Entrar: botão do Google em cima, "ou" separando do formulário de senha */
+.signin-google {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.google-button {
+  min-height: 44px;
+}
+
+.signin-or {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.signin-or::before,
+.signin-or::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+
+/* Conta no topo: foto ou inicial; o nome some nos celulares para caber com o menu */
+.account {
+  position: relative;
+  flex: none;
+}
+
+.account summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  list-style: none;
+  cursor: pointer;
+  color: var(--chalk);
+  font-weight: 600;
+}
+
+.account summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-photo {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--line);
+}
+
+.account-initial {
+  background: var(--surface);
+  color: var(--grass);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.account[open] .account-photo {
+  border-color: var(--grass);
+}
+
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  display: grid;
+  min-width: 12rem;
+  padding: var(--space-2) 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.account-menu a,
+.account-menu button {
+  padding: var(--space-2) var(--space-4);
+  color: var(--chalk);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.account-menu a:hover,
+.account-menu button:hover {
+  background: var(--bg);
+}
+
+@media (max-width: 479px) {
+  .account-name {
+    display: none;
+  }
 }

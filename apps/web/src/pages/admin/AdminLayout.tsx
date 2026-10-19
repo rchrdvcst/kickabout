@@ -1,29 +1,23 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router';
-import { logout } from '../../api/admin';
+import { NavLink, Navigate, Outlet, useLocation } from 'react-router';
 import { useMe } from '../../api/queries';
-import { forgetSession } from '../../api/session';
+import { useSignOut } from '../../api/use-sign-out';
 import { FormError } from '../../components/FormError';
 import { QueryState } from '../../components/QueryState';
+import { NotFoundPage } from '../NotFoundPage';
 
-/** Tudo em /admin exige login; sem sessão, vai para /entrar e volta para cá depois. */
+/**
+ * Tudo em /admin exige um organizador. Sem sessão, vai para /entrar e volta para cá depois.
+ * Usuário comum vê a página de "não encontrada", como em qualquer endereço que não existe.
+ */
 export function AdminLayout() {
   const me = useMe();
   const location = useLocation();
-  const navigate = useNavigate();
-  const client = useQueryClient();
-  const exit = useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      forgetSession(client);
-      navigate('/');
-    },
-  });
+  const exit = useSignOut();
 
   return (
     <QueryState query={me}>
       {({ user }) =>
-        user ? (
+        user?.role === 'admin' ? (
           <>
             <div className="admin-bar">
               <nav aria-label="Administração" className="admin-nav">
@@ -34,6 +28,7 @@ export function AdminLayout() {
                 <NavLink to="/admin/times">Times</NavLink>
                 <NavLink to="/admin/jogadores">Jogadores</NavLink>
                 <NavLink to="/admin/titulos">Títulos</NavLink>
+                <NavLink to="/admin/usuarios">Usuários</NavLink>
               </nav>
               <button type="button" className="admin-exit" disabled={exit.isPending} onClick={() => exit.mutate()}>
                 Sair
@@ -42,6 +37,8 @@ export function AdminLayout() {
             <FormError error={exit.error} />
             <Outlet />
           </>
+        ) : user ? (
+          <NotFoundPage />
         ) : exit.isPending || exit.isSuccess ? null : (
           // Saindo por vontade própria: vai para o início, não para o login.
           <Navigate to={`/entrar?voltar=${encodeURIComponent(location.pathname + location.search)}`} replace />

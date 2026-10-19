@@ -6,6 +6,7 @@ export interface AppConfig {
   phoneVisibility: PhoneVisibility;
   sessionTtlDays: number;
   secureCookies: boolean;
+  googleClientId: string | null;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -21,5 +22,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     phoneVisibility,
     sessionTtlDays: Number(env.SESSION_TTL_DAYS ?? 30),
     secureCookies: env.NODE_ENV === 'production',
+    googleClientId: env.GOOGLE_CLIENT_ID?.trim() || null,
   };
 }

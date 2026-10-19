@@ -32,10 +32,11 @@ describe('layout', () => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
   });
-  it('links to the organizer area from the footer', async () => {
-    mockApi({});
+  it('offers sign in from the footer to visitors', async () => {
+    mockApi({ '/auth/me': { user: null } });
     renderRoute('/rota-que-nao-existe');
-    expect(await screen.findByRole('link', { name: 'Área do organizador' })).toHaveAttribute('href', '/admin');
+    expect(await screen.findByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/entrar');
+    expect(screen.queryByText(/organizador/i)).toBeNull();
   });
   it('shows the Kickabout logo as the home link', async () => {
     mockApi({});
